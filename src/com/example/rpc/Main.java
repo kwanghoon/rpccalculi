@@ -1,8 +1,6 @@
 package com.example.rpc;
 
 public class Main {
-	Term t;
-
 	public static Value eval(Term m, Location loc) {
 		if (m instanceof Lam) {
 			Lam lam = (Lam) m;

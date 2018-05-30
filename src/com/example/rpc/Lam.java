@@ -1,3 +1,4 @@
+package com.example.rpc;
 
 public class Lam extends Value {
 	private Location loc;

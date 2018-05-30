@@ -1,3 +1,4 @@
+package com.example.rpc;
 
 public class App extends Term {
 	private Term fun;

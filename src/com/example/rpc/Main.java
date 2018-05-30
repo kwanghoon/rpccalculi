@@ -1,3 +1,4 @@
+package com.example.rpc;
 
 public class Main {
 	Term t;

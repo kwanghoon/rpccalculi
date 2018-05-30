@@ -1,3 +1,4 @@
+package com.example.rpc;
 
 public class Var extends Value {
 	private String var;

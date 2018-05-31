@@ -1,7 +1,13 @@
 package com.example.typerpc;
 
-public class TypedRPCMain {
+import com.example.rpc.Location;
 
+public class TypedRPCMain {
+	public static TypedTerm eval(TypedTerm ex1, Location client) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	public static Type subst(Type t, int i, Type ty) {
 		if (t instanceof IntType) {
 			IntType intType = (IntType) t;
@@ -80,6 +86,20 @@ public class TypedRPCMain {
 	}
 	
 	public static void main(String[] args) {
+		TypedTerm leftApp = new App(new LocType(Location.Server),
+				new Lam(Location.Server, "x", new IntType(), new Var("x")),
+				new App(new LocType(Location.Client), new Var("f"), new Const(1)));
 		
+		TypedTerm left = new Lam(Location.Server, "f", new IntType(), leftApp);
+		
+		TypedTerm right = new Lam(Location.Client, "y",  new IntType(),
+				new App(new LocType(Location.Server),
+						new Lam(Location.Server, "z", new IntType(), new Var("z")),
+						new Var("y")));
+		
+		TypedTerm ex1 = new App(new LocType(Location.Client), left, right);
+		System.out.println(ex1.toString());
+		System.out.println(eval(ex1, Location.Client).toString());
 	}
+
 }

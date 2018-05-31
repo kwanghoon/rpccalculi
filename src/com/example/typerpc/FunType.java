@@ -31,7 +31,7 @@ public class FunType extends Type {
 	
 	@Override
 	public String toString() {
-		String ret = "(" + left.toString() + "-" + loc.toString() + " -> " + right.toString() + ")";
+		String ret = "(" + left.toString() + "-" + loc.toString() + "->" + right.toString() + ")";
 		return ret;
 	}
 	

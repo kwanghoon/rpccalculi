@@ -3,11 +3,6 @@ package com.example.typerpc;
 import com.example.rpc.Location;
 
 public class TypedRPCMain {
-	public static TypedTerm eval(TypedTerm ex1, Location client) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 	public static Type subst(Type t, int i, Type ty) {
 		if (t instanceof IntType) {
 			IntType intType = (IntType) t;
@@ -99,7 +94,7 @@ public class TypedRPCMain {
 		
 		TypedTerm ex1 = new App(new LocType(Location.Client), left, right);
 		System.out.println(ex1.toString());
-		System.out.println(eval(ex1, Location.Client).toString());
+//		System.out.println(eval(ex1, Location.Client).toString());
 	}
 
 }

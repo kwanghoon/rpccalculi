@@ -3,6 +3,7 @@ package com.example.typerpc;
 import java.util.ArrayList;
 
 import com.example.rpc.Term;
+import com.example.utils.TripleTup;
 
 import javafx.util.Pair;
 
@@ -123,7 +124,7 @@ public class Infer {
 		ArrayList<Equ> retList = new ArrayList<>();
 		boolean retBool = false;
 		if (equList == null || equList.isEmpty())
-			return new Pair<>(equs, new Boolean(false));
+			return new Pair<>(equs, false);
 		else {
 			for (Equ equ : equList) {
 				Pair<Equations, Boolean> p1 = unify(equ);
@@ -259,14 +260,14 @@ public class Infer {
 			return new Pair<>(equs, false);
 		} else {
 			for (Equ equ : equList) {
-				MergeInform mergeRest = mergeTheRest(equ, equs);
-				Pair<Equations, Boolean> p = mergeAll(mergeRest.getEqus2());
+				TripleTup<Equations, Equations, Boolean> mergeRest = mergeTheRest(equ, equs);
+				Pair<Equations, Boolean> p = mergeAll(mergeRest.getSecond());
 				
 				retList.add(equ);
-				retList.addAll(mergeRest.getEqus1().getEqus());
+				retList.addAll(mergeRest.getFirst().getEqus());
 				retList.addAll(p.getKey().getEqus());
 				
-				retBool = retBool || mergeRest.isChanged() || p.getValue();
+				retBool = retBool || mergeRest.getThird() || p.getValue();
 			}
 			
 			Equations retEqus = new Equations();
@@ -276,44 +277,77 @@ public class Infer {
 		}
 	}
 	
-	public static MergeInform mergeTheRest(Equ equ, Equations equs) {
-		
+	public static TripleTup<Equations, Equations, Boolean> mergeTheRest(Equ equ, Equations equs) {
+		for (Equ e: equs.getEqus()) {
+			if (equ instanceof EquTy && e instanceof EquTy) {
+				EquTy equTy1 = (EquTy) equ;
+				EquTy equTy2 = (EquTy) e;
+				
+				TripleTup<Equations, Equations, Boolean> merg = mergeTheRest(equTy1, equs);
+				
+				if (equTy1.getTy1() == equTy2.getTy1()) {
+					Pair<Equations, Boolean> p1 = unify(new EquTy(equTy1.getTy2(), equTy2.getTy2()));
+					
+					Equations retEqus = new Equations();
+					ArrayList<Equ> equList = new ArrayList<>();
+					equList.addAll(p1.getKey().getEqus());
+					equList.addAll(merg.getFirst().getEqus());
+					retEqus.setEqus(equList);
+					
+					return new TripleTup<>(retEqus, merg.getSecond(), p1.getValue() || merg.getThird());
+				}
+				else {
+					Equations retSec = merg.getSecond();
+					ArrayList<Equ> equList = retSec.getEqus();
+					equList.add(equTy2);
+					retSec.setEqus(equList);
+					
+					return new TripleTup<>(merg.getFirst(), retSec, merg.getThird());
+				}
+				
+			}
+			else if (equ instanceof EquLoc && e instanceof EquLoc) {
+				EquLoc equloc1 = (EquLoc) equ;
+				EquLoc equloc2 = (EquLoc) e;
+				
+				TripleTup<Equations, Equations, Boolean> merg = mergeTheRest(equloc1, equs);
+				
+				if (equloc1.getTyloc1() == equloc2.getTyloc1()) {
+					Pair<Equations, Boolean> p1 = unify(new EquLoc(equloc1.getTyloc2(), equloc2.getTyloc2()));
+
+					Equations retEqus = new Equations();
+					ArrayList<Equ> equList = new ArrayList<>();
+					equList.addAll(p1.getKey().getEqus());
+					equList.addAll(merg.getFirst().getEqus());
+					retEqus.setEqus(equList);
+					
+					return new TripleTup<>(retEqus, merg.getSecond(), p1.getValue() || merg.getThird());
+				}
+				else {
+					Equations retSec = merg.getSecond();
+					ArrayList<Equ> equList = retSec.getEqus();
+					equList.add(equloc2);
+					retSec.setEqus(equList);
+					
+					return new TripleTup<>(merg.getFirst(), retSec, merg.getThird());
+				}
+			}
+			else {
+				TripleTup<Equations, Equations, Boolean> merg = mergeTheRest(equ, equs);
+
+				Equations retEqus = new Equations();
+				ArrayList<Equ> equList = new ArrayList<>();
+				equList.add(e);
+				retEqus.setEqus(equList);
+				
+				return new TripleTup<>(merg.getFirst(), retEqus, merg.getThird());
+			}
+		}
+		return null;
 	}
 
 	public static Pair<Equations, Boolean> propagate(Equations equs) {
-
+		
 	}
 	
-	class MergeInform {
-		private Equations equs1;
-		private Equations equs2;
-		private boolean changed;
-		
-		public MergeInform(Equations equs1, Equations equs2, boolean changed) {
-			super();
-			this.equs1 = equs1;
-			this.equs2 = equs2;
-			this.changed = changed;
-		}
-		
-		public Equations getEqus1() {
-			return equs1;
-		}
-		public void setEqus1(Equations equs1) {
-			this.equs1 = equs1;
-		}
-		public Equations getEqus2() {
-			return equs2;
-		}
-		public void setEqus2(Equations equs2) {
-			this.equs2 = equs2;
-		}
-		public boolean isChanged() {
-			return changed;
-		}
-		public void setChanged(boolean changed) {
-			this.changed = changed;
-		}
-		
-	}
 }

@@ -17,12 +17,14 @@ public class TripleTup<E, V, T> {
 	public void setFirst(E first) {
 		this.first = first;
 	}
+	
 	public V getSecond() {
 		return second;
 	}
 	public void setSecond(V second) {
 		this.second = second;
 	}
+	
 	public T getThird() {
 		return third;
 	}

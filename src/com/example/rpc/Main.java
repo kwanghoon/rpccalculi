@@ -1,5 +1,7 @@
 package com.example.rpc;
 
+import com.example.typerpc.Infer;
+
 public class Main {
 	public static Value eval(Term m, Location loc) {
 		if (m instanceof Lam) {
@@ -71,5 +73,9 @@ public class Main {
 		Term ex1 = new App(left, right);
 		System.out.println(ex1.toString());
 		System.out.println(eval(ex1, Location.Client).toString());
+		
+		com.example.typerpc.Infer inf = new Infer();
+		com.example.typerpc.TypedTerm tym = inf.infer(ex1);
+		System.out.println(tym.toString());
 	}
 }

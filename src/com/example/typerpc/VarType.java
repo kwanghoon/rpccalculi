@@ -20,5 +20,14 @@ public class VarType extends Type {
 	public String toString() {
 		return "a " + var;
 	}
+
+	@Override
+	public boolean equals(Object arg0) {
+		if (arg0 instanceof VarType) {
+			VarType varTy = (VarType) arg0;
+			return varTy.getVar() == this.var;
+		}
+		return false;
+	}
 	
 }

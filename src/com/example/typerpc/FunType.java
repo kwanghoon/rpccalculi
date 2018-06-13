@@ -34,5 +34,17 @@ public class FunType extends Type {
 		String ret = "(" + left.toString() + "-" + loc.toString() + "->" + right.toString() + ")";
 		return ret;
 	}
+	@Override
+	public boolean equals(Object arg0) {
+		if (arg0 instanceof FunType) {
+			FunType fun = (FunType) arg0;
+			
+			return fun.getLeft().equals(this.left) && fun.getRight().equals(this.right)
+					 && fun.getLoc().equals(this.loc);
+		}
+		return false;
+	}
+	
+	
 	
 }

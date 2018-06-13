@@ -8,6 +8,9 @@ public class Equations {
 	public Equations() {
 		equs = new ArrayList<>();
 	}
+	public Equations(ArrayList<Equ> equs) {
+		this.equs = equs;
+	}
 
 	public ArrayList<Equ> getEqus() {
 		return equs;

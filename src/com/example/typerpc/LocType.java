@@ -25,4 +25,15 @@ public class LocType extends TypedLocation {
 		else
 			return "s";
 	}
+
+	@Override
+	public boolean equals(Object arg0) {
+		if (arg0 instanceof LocType) {
+			LocType locTy = (LocType) arg0;
+			
+			return locTy.getLoc().equals(this.loc);
+		}
+		return false;
+	}
+	
 }

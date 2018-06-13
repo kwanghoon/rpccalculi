@@ -1,8 +1,8 @@
 package com.example.rpc.test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import com.example.rpc.Location;
 

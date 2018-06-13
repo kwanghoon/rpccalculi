@@ -74,8 +74,7 @@ public class Main {
 		System.out.println(ex1.toString());
 		System.out.println(eval(ex1, Location.Client).toString());
 		
-		com.example.typerpc.Infer inf = new Infer();
-		com.example.typerpc.TypedTerm tym = inf.infer(ex1);
+		com.example.typerpc.TypedTerm tym = Infer.infer(ex1);
 		System.out.println(tym.toString());
 	}
 }

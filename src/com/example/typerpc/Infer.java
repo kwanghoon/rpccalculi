@@ -267,7 +267,7 @@ public class Infer {
 
 				TripleTup<Equations, Equations, Boolean> merg = mergeTheRest(equty1, new Equations(equList));
 
-				if (equty1.getTy1() == equty2.getTy2()) {
+				if (equty1.getTy1() == equty2.getTy1()) {
 					Pair<Equations, Boolean> p = unify(new EquTy(equty1.getTy2(), equty2.getTy2()));
 					retList = new ArrayList<>();
 					retList.addAll(p.getKey().getEqus());
@@ -278,8 +278,8 @@ public class Infer {
 					return retTrip;
 				} else {
 					retList = new ArrayList<>();
-					retList.addAll(merg.getSecond().getEqus());
 					retList.add(equty2);
+					retList.addAll(merg.getSecond().getEqus());
 
 					retTrip = new TripleTup<>(merg.getFirst(), new Equations(retList), merg.getThird());
 
@@ -316,6 +316,7 @@ public class Infer {
 
 				retList = new ArrayList<>();
 				retList.add(e);
+				retList.addAll(merg.getSecond().getEqus());
 
 				retTrip = new TripleTup<>(merg.getFirst(), new Equations(retList), merg.getThird());
 
@@ -423,6 +424,7 @@ public class Infer {
 		ArrayList<Equ> equList1 = equs1.getEqus();
 
 		if (equList1 == null || equList1.isEmpty()) {
+			retEqus.getEqus().addAll(equs2.getEqus());
 			retPair = new Pair<>(retEqus, changed);
 
 			return retPair;
@@ -449,6 +451,7 @@ public class Infer {
 					}
 				}
 			}
+			retEqus.getEqus().addAll(equs2.getEqus());
 			retPair = new Pair<>(retEqus, changed);
 			return retPair;
 		}

@@ -18,7 +18,7 @@ public class VarType extends Type {
 	
 	@Override
 	public String toString() {
-		return "a " + var;
+		return "a" + var;
 	}
 
 	@Override

@@ -19,7 +19,7 @@ public class LocVarType extends TypedLocation {
 	
 	@Override
 	public String toString() {
-		return "l " + var;
+		return "l" + var;
 	}
 
 	@Override

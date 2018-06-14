@@ -86,34 +86,14 @@ public class Infer {
 			Pair<Equations, Boolean> p2 = mergeAll(p1.getKey());
 			Pair<Equations, Boolean> p3 = propagate(p2.getKey());
 
-			System.out.println(p1.getValue() + ", " + p2.getValue() + ", " + p3.getValue());
 			if (p1.getValue() || p2.getValue() || p3.getValue()) {
 				equs = p3.getKey();
-				System.out.println("###start###");
-				for (Equ equ: equs.getEqus()) {
-					if (equ instanceof EquTy)
-						printEquTy(equ);
-					else
-						printEquLoc(equ);
-				}
-				System.out.println("###end###");
 			}
 			else
 				return equs;
 		}
 	}
 	
-	public static void printEquTy(Equ equ) {
-		EquTy equty = (EquTy) equ;
-		System.out.print(equty.getTy1().toString() + " ");
-		System.out.println(equty.getTy2().toString());
-	}
-	public static void printEquLoc(Equ equ) {
-		EquLoc equloc = (EquLoc) equ;
-		System.out.print(equloc.getTyloc1().toString() + " ");
-		System.out.println(equloc.getTyloc2().toString());
-	}
-
 	public static Pair<Equations, Boolean> unifyEqus(Equations equs) {
 		ArrayList<Equ> equList = equs.getEqus();
 		ArrayList<Equ> retList = new ArrayList<>();

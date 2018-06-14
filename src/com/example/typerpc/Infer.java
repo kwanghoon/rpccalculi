@@ -171,7 +171,7 @@ public class Infer {
 			ArrayList<Equ> equList = new ArrayList<>();
 			equList.add(new EquTy(varTy1, ty2));
 
-			retPair = new Pair<>(new Equations(equList), true);
+			retPair = new Pair<>(new Equations(equList), false);
 
 			return retPair;
 		} else if (ty1 instanceof FunType) {

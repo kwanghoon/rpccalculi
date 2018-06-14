@@ -86,11 +86,32 @@ public class Infer {
 			Pair<Equations, Boolean> p2 = mergeAll(p1.getKey());
 			Pair<Equations, Boolean> p3 = propagate(p2.getKey());
 
-			if (p1.getValue() || p2.getValue() || p3.getValue())
+			System.out.println(p1.getValue() + ", " + p2.getValue() + ", " + p3.getValue());
+			if (p1.getValue() || p2.getValue() || p3.getValue()) {
 				equs = p3.getKey();
+				System.out.println("###start###");
+				for (Equ equ: equs.getEqus()) {
+					if (equ instanceof EquTy)
+						printEquTy(equ);
+					else
+						printEquLoc(equ);
+				}
+				System.out.println("###end###");
+			}
 			else
 				return equs;
 		}
+	}
+	
+	public static void printEquTy(Equ equ) {
+		EquTy equty = (EquTy) equ;
+		System.out.print(equty.getTy1().toString() + " ");
+		System.out.println(equty.getTy2().toString());
+	}
+	public static void printEquLoc(Equ equ) {
+		EquLoc equloc = (EquLoc) equ;
+		System.out.print(equloc.getTyloc1().toString() + " ");
+		System.out.println(equloc.getTyloc2().toString());
 	}
 
 	public static Pair<Equations, Boolean> unifyEqus(Equations equs) {
@@ -419,6 +440,7 @@ public class Infer {
 	public static Pair<Equations, Boolean> propagate_(Equations equs1, Equations equs2) {
 		Pair<Equations, Boolean> retPair;
 		Equations retEqus = new Equations();
+		Equations cloneEqus = new Equations((ArrayList<Equ>) equs1.getEqus().clone());
 		boolean changed = false;
 
 		ArrayList<Equ> equList1 = equs1.getEqus();
@@ -429,29 +451,32 @@ public class Infer {
 
 			return retPair;
 		} else {
-			for (Equ equ : equList1) {
-				if (equ instanceof EquTy) {
-					EquTy equty = (EquTy) equ;
+			Equ equ = cloneEqus.getEqus().get(0);
+			cloneEqus.getEqus().remove(equ);
+			
+			if (equ instanceof EquTy) {
+				EquTy equty = (EquTy) equ;
 
-					if (equty.getTy1() instanceof VarType) {
-						VarType varty1 = (VarType) equty.getTy1();
-						Pair<Equations, Boolean> p1 = propagateTy(varty1.getVar(), equty.getTy2(), equs2);
-						retEqus.getEqus().addAll(p1.getKey().getEqus());
-						changed = changed || p1.getValue();
-					}
-				} else if (equ instanceof EquLoc) {
-					EquLoc equloc = (EquLoc) equ;
+				if (equty.getTy1() instanceof VarType) {
+					VarType varty1 = (VarType) equty.getTy1();
+					Pair<Equations, Boolean> p1 = propagateTy(varty1.getVar(), equty.getTy2(), equs2);
+					Pair<Equations, Boolean> p2 = propagate_(cloneEqus, p1.getKey());
+					retEqus.getEqus().addAll(p2.getKey().getEqus());
+					changed = changed || p1.getValue() || p2.getValue();
+				}
+			} else if (equ instanceof EquLoc) {
+				EquLoc equloc = (EquLoc) equ;
 
-					if (equloc.getTyloc1() instanceof LocVarType) {
-						LocVarType locvarty1 = (LocVarType) equloc.getTyloc1();
+				if (equloc.getTyloc1() instanceof LocVarType) {
+					LocVarType locvarty1 = (LocVarType) equloc.getTyloc1();
 
-						Pair<Equations, Boolean> p1 = propagateLoc(locvarty1.getVar(), equloc.getTyloc2(), equs2);
-						retEqus.getEqus().addAll(p1.getKey().getEqus());
-						changed = changed || p1.getValue();
-					}
+					Pair<Equations, Boolean> p1 = propagateLoc(locvarty1.getVar(), equloc.getTyloc2(), equs2);
+					Pair<Equations, Boolean> p2 = propagate_(cloneEqus, p1.getKey());
+					retEqus.getEqus().addAll(p2.getKey().getEqus());
+					changed = changed || p1.getValue() || p2.getValue();
 				}
 			}
-			retEqus.getEqus().addAll(equs2.getEqus());
+			
 			retPair = new Pair<>(retEqus, changed);
 			return retPair;
 		}

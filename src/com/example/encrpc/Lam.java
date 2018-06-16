@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.example.rpc.Location;
 
-public class Lam extends EncTerm {
+public class Lam extends EncValue {
 	private Location loc;
 	private ArrayList<String> strArr;
 	private EncTerm term;

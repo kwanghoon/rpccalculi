@@ -1,6 +1,6 @@
 package com.example.encrpc;
 
-public class Const extends EncTerm {
+public class Const extends EncValue {
 	private int i;
 
 	public Const(int i) {

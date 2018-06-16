@@ -1,6 +1,6 @@
 package com.example.encrpc;
 
-public class Var extends EncTerm {
+public class Var extends EncValue {
 	private String x;
 
 	public Var(String x) {

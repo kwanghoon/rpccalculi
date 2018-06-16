@@ -1,4 +1,4 @@
-package com.example.typerpc;
+package com.example.typedrpc;
 
 import java.util.ArrayList;
 

@@ -1,6 +1,6 @@
 package com.example.rpc;
 
-import com.example.typerpc.Infer;
+import com.example.typedrpc.Infer;
 
 public class Main {
 	public static Value eval(Term m, Location loc) {
@@ -74,7 +74,7 @@ public class Main {
 		System.out.println(ex1.toString());
 		System.out.println(eval(ex1, Location.Client).toString());
 		
-		com.example.typerpc.TypedTerm tym = Infer.infer(ex1);
+		com.example.typedrpc.TypedTerm tym = Infer.infer(ex1);
 		System.out.println(tym.toString());
 	}
 }

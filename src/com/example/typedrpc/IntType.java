@@ -1,4 +1,4 @@
-package com.example.typerpc;
+package com.example.typedrpc;
 
 public class IntType extends Type {
 	@Override

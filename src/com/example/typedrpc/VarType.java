@@ -1,10 +1,9 @@
-package com.example.typerpc;
+package com.example.typedrpc;
 
-public class LocVarType extends TypedLocation {
+public class VarType extends Type {
 	private int var;
 
-	
-	public LocVarType(int var) {
+	public VarType(int var) {
 		super();
 		this.var = var;
 	}
@@ -19,17 +18,16 @@ public class LocVarType extends TypedLocation {
 	
 	@Override
 	public String toString() {
-		return "l" + var;
+		return "a" + var;
 	}
 
 	@Override
 	public boolean equals(Object arg0) {
-		if (arg0 instanceof LocVarType) {
-			LocVarType locVarTy = (LocVarType) arg0;
-			return locVarTy.getVar() == this.var;
+		if (arg0 instanceof VarType) {
+			VarType varTy = (VarType) arg0;
+			return varTy.getVar() == this.var;
 		}
 		return false;
 	}
-	
 	
 }

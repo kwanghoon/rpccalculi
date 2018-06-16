@@ -1,4 +1,4 @@
-package com.example.typerpc;
+package com.example.typedrpc;
 
 public class FunType extends Type {
 	private Type left;

@@ -1,4 +1,4 @@
-package com.example.typerpc;
+package com.example.typedrpc;
 
 public class EquLoc extends Equ {
 	private TypedLocation tyloc1;

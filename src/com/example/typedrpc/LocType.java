@@ -4,7 +4,7 @@ import com.example.rpc.Location;
 
 public class LocType extends TypedLocation {
 	Location loc;
-	
+
 	public LocType(Location loc) {
 		super();
 		this.loc = loc;
@@ -17,7 +17,7 @@ public class LocType extends TypedLocation {
 	public void setLoc(Location loc) {
 		this.loc = loc;
 	}
-	
+
 	@Override
 	public String toString() {
 		if (loc == Location.Client)
@@ -30,10 +30,10 @@ public class LocType extends TypedLocation {
 	public boolean equals(Object arg0) {
 		if (arg0 instanceof LocType) {
 			LocType locTy = (LocType) arg0;
-			
+
 			return locTy.getLoc().equals(this.loc);
 		}
 		return false;
 	}
-	
+
 }

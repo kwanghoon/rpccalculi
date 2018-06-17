@@ -15,10 +15,10 @@ public class Var extends TypedTerm {
 	public void setVar(String var) {
 		this.var = var;
 	}
-	
+
 	@Override
 	public String toString() {
 		return var;
 	}
-	
+
 }

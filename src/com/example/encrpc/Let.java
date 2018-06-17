@@ -4,7 +4,7 @@ public class Let extends EncTerm {
 	private String val;
 	private EncTerm m1;
 	private EncTerm m2;
-	
+
 	public Let(String val, EncTerm m1, EncTerm m2) {
 		super();
 		this.val = val;
@@ -39,12 +39,12 @@ public class Let extends EncTerm {
 	@Override
 	public String toString() {
 		String ret = "let ";
-		
+
 		ret += val + " ";
 		ret += m1.toString() + " in ";
 		ret += m2.toString();
-		
+
 		return ret;
 	}
-	
+
 }

@@ -7,18 +7,21 @@ public class Main {
 		if (m instanceof Lam) {
 			Lam lam = (Lam) m;
 			return lam;
-		} else if (m instanceof App) {
+		}
+		else if (m instanceof App) {
 			App app = (App) m;
 			Lam lam = (Lam) eval(app.getFun(), loc);
 			Value w = eval(app.getArg(), loc);
 			Value v = eval(subst(lam.getM(), lam.getX(), w), lam.getLoc());
 
 			return v;
-		} else if (m instanceof Const) {
+		}
+		else if (m instanceof Const) {
 			Const con = (Const) m;
 
 			return con;
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -29,21 +32,25 @@ public class Main {
 
 			if (var.getVar() == x) {
 				return v;
-			} else {
+			}
+			else {
 				return var;
 			}
-		} else if (m instanceof Lam) {
+		}
+		else if (m instanceof Lam) {
 			Lam lam = (Lam) m;
 
 			if (lam.getX() == x) {
 				return lam;
-			} else {
+			}
+			else {
 				Lam l = lam;
 				l.setM(subst(lam.getM(), x, v));
 
 				return l;
 			}
-		} else if (m instanceof App) {
+		}
+		else if (m instanceof App) {
 			App app = (App) m;
 
 			Term left = subst(app.getFun(), x, v);
@@ -51,29 +58,27 @@ public class Main {
 			App ret = new App(left, right);
 
 			return ret;
-		} else if (m instanceof Const) {
+		}
+		else if (m instanceof Const) {
 			Const con = (Const) m;
 
 			return con;
-		} else
+		}
+		else
 			return null;
 	}
 
 	public static void main(String[] args) {
-		Term leftApp = new App(
-				new Lam(Location.Server, "x", new Var("x")),
-				new App(new Var("f"), new Const(1)));
-		
+		Term leftApp = new App(new Lam(Location.Server, "x", new Var("x")), new App(new Var("f"), new Const(1)));
+
 		Term left = new Lam(Location.Server, "f", leftApp);
-		
-		Term right = new Lam(Location.Client, "y",
-				new App(new Lam(Location.Server, "z", new Var("z")),
-						new Var("y")));
-		
+
+		Term right = new Lam(Location.Client, "y", new App(new Lam(Location.Server, "z", new Var("z")), new Var("y")));
+
 		Term ex1 = new App(left, right);
 		System.out.println(ex1.toString());
 		System.out.println(eval(ex1, Location.Client).toString());
-		
+
 		com.example.typedrpc.TypedTerm tym = Infer.infer(ex1);
 		System.out.println(tym.toString());
 	}

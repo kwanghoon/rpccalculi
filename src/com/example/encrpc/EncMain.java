@@ -8,14 +8,16 @@ public class EncMain {
 			Const mConst = (Const) m;
 
 			return mConst;
-		} else if (m instanceof Var) {
+		}
+		else if (m instanceof Var) {
 			Var mVar = (Var) m;
 
 			if (mVar.getX() == x)
 				return v;
 			else
 				return mVar;
-		} else if (m instanceof Call) {
+		}
+		else if (m instanceof Call) {
 			Call mCall = (Call) m;
 
 			EncTerm call = subst(mCall.getCall(), x, v);
@@ -30,7 +32,8 @@ public class EncMain {
 			Call retCall = new Call((EncValue) call, args);
 
 			return retCall;
-		} else if (m instanceof App) {
+		}
+		else if (m instanceof App) {
 			App mApp = (App) m;
 
 			EncTerm fun = subst(mApp.getFun(), x, v);
@@ -45,7 +48,8 @@ public class EncMain {
 			App retApp = new App((EncValue) fun, args);
 
 			return retApp;
-		} else if (m instanceof Req) {
+		}
+		else if (m instanceof Req) {
 			Req mReq = (Req) m;
 
 			EncTerm req = subst(mReq.getReq(), x, v);
@@ -60,7 +64,8 @@ public class EncMain {
 			Req retReq = new Req((EncValue) req, args);
 
 			return retReq;
-		} else if (m instanceof Let) {
+		}
+		else if (m instanceof Let) {
 			Let mLet = (Let) m;
 
 			EncTerm m1 = subst(mLet.getM1(), x, v);

@@ -3,7 +3,7 @@ package com.example.typedrpc;
 public class EquLoc extends Equ {
 	private TypedLocation tyloc1;
 	private TypedLocation tyloc2;
-	
+
 	public EquLoc(TypedLocation tyloc1, TypedLocation tyloc2) {
 		super();
 		this.tyloc1 = tyloc1;
@@ -25,5 +25,5 @@ public class EquLoc extends Equ {
 	public void setTyloc2(TypedLocation tyloc2) {
 		this.tyloc2 = tyloc2;
 	}
-	
+
 }

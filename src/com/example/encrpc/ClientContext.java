@@ -4,7 +4,7 @@ public class ClientContext {
 	private Ctx ctx;
 	private String str;
 	private EncTerm m;
-	
+
 	public ClientContext(Ctx ctx, String str, EncTerm m) {
 		super();
 		this.ctx = ctx;

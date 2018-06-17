@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class App extends EncTerm {
 	private EncValue fun;
 	private ArrayList<EncValue> args;
-	
+
 	public App(EncValue fun, ArrayList<EncValue> args) {
 		super();
 		this.fun = fun;
@@ -31,13 +31,13 @@ public class App extends EncTerm {
 	@Override
 	public String toString() {
 		String ret = "(" + fun.toString() + ") (";
-		
-		for (EncValue ev: args) {
+
+		for (EncValue ev : args) {
 			ret += ev.toString() + " ";
 		}
 		ret += ")";
-		
+
 		return ret;
 	}
-	
+
 }

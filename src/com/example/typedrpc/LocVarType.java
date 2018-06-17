@@ -3,7 +3,6 @@ package com.example.typedrpc;
 public class LocVarType extends TypedLocation {
 	private int var;
 
-	
 	public LocVarType(int var) {
 		super();
 		this.var = var;
@@ -16,7 +15,7 @@ public class LocVarType extends TypedLocation {
 	public void setVar(int var) {
 		this.var = var;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "l" + var;
@@ -30,6 +29,5 @@ public class LocVarType extends TypedLocation {
 		}
 		return false;
 	}
-	
-	
+
 }

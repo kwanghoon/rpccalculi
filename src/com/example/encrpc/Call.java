@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Call extends EncTerm {
 	private EncValue call;
 	private ArrayList<EncValue> args;
-	
+
 	public Call(EncValue call, ArrayList<EncValue> args) {
 		super();
 		this.call = call;
@@ -31,14 +31,14 @@ public class Call extends EncTerm {
 	@Override
 	public String toString() {
 		String ret = "Call(" + call.toString() + ") (";
-		
-		for (EncValue ev: args) {
+
+		for (EncValue ev : args) {
 			ret += ev.toString() + " ";
 		}
-		
+
 		ret += ")";
-		
+
 		return ret;
 	}
-		
+
 }

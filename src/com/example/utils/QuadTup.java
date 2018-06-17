@@ -5,7 +5,7 @@ public class QuadTup<E, T, V, M> {
 	private T second;
 	private V third;
 	private M fourth;
-	
+
 	public QuadTup(E first, T second, V third, M fourth) {
 		super();
 		this.first = first;
@@ -45,5 +45,5 @@ public class QuadTup<E, T, V, M> {
 	public void setFourth(M fourth) {
 		this.fourth = fourth;
 	}
-		
+
 }

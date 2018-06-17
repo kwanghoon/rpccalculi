@@ -7,7 +7,7 @@ public class Lam extends TypedTerm {
 	private String x;
 	private Type t;
 	private TypedTerm typedTerm;
-	
+
 	public Lam(Location loc, String x, Type t, TypedTerm typedTerm) {
 		super();
 		this.loc = loc;
@@ -47,18 +47,18 @@ public class Lam extends TypedTerm {
 	public void setTypedTerm(TypedTerm typedTerm) {
 		this.typedTerm = typedTerm;
 	}
-	
+
 	@Override
 	public String toString() {
 		String ret = "lam^";
-		
+
 		if (loc == Location.Client)
 			ret += "c";
 		else if (loc == Location.Server)
 			ret += "s";
-		
+
 		ret += " (" + x + ": " + t.toString() + ")." + typedTerm.toString();
-		
+
 		return ret;
 	}
 }

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Req extends EncTerm {
 	private EncValue req;
 	private ArrayList<EncValue> args;
-	
+
 	public Req(EncValue req, ArrayList<EncValue> args) {
 		super();
 		this.req = req;
@@ -33,14 +33,14 @@ public class Req extends EncTerm {
 		String ret = "Req(";
 		ret += req.toString();
 		ret += ") (";
-		
-		for (EncValue ev: args) {
+
+		for (EncValue ev : args) {
 			ret += ev.toString() + " ";
 		}
-		
+
 		ret += ")";
-		
+
 		return ret;
 	}
-	
+
 }

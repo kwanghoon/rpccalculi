@@ -15,7 +15,7 @@ public class VarType extends Type {
 	public void setVar(int var) {
 		this.var = var;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "a" + var;
@@ -29,5 +29,5 @@ public class VarType extends Type {
 		}
 		return false;
 	}
-	
+
 }

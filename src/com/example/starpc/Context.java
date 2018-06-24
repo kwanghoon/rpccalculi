@@ -1,9 +1,10 @@
-package com.example.encrpc;
+package com.example.starpc;
 
-public class ClientContext {
+public class Context {
 	private Ctx ctx;
-	
-	public ClientContext(Ctx ctx) {
+
+	public Context(Ctx ctx) {
+		super();
 		this.ctx = ctx;
 	}
 
@@ -14,5 +15,5 @@ public class ClientContext {
 	public void setCtx(Ctx ctx) {
 		this.ctx = ctx;
 	}
-
+	
 }

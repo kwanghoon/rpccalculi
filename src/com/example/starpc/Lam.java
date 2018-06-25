@@ -49,6 +49,7 @@ public class Lam extends StaValue {
 		else
 			ret += "s";
 		
+		ret += "(";
 		for(String s: xs)
 			ret += s + " ";
 		

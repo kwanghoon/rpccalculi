@@ -81,5 +81,11 @@ public class Main {
 
 		com.example.typedrpc.TypedTerm tym = Infer.infer(ex1);
 		System.out.println(tym.toString());
+		
+		
+		System.out.println("----EncTerm----");
+		System.out.println(com.example.encrpc.CompEncTerm.compEncTerm(tym));
+		System.out.println("----StaTerm----");
+		System.out.println(com.example.starpc.CompStaTerm.compStaTerm(tym));
 	}
 }

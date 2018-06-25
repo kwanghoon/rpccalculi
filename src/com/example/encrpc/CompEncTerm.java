@@ -100,6 +100,8 @@ public class CompEncTerm {
 					retPair = new Pair<>(j, new Let(fvar, p1.getValue(),
 							new Let(xvar, p2.getValue(), new Let(rvar, new Req(f, reqXs), r))));
 				}
+				
+				return retPair;
 			}
 		}
 

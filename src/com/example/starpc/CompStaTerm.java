@@ -199,6 +199,8 @@ public class CompStaTerm {
 					
 					retPair = new Pair<>(p2.getKey(), retLet);
 				}
+				
+				return retPair;
 			}
 		}
 

@@ -40,7 +40,7 @@ public class Let extends EncTerm {
 	public String toString() {
 		String ret = "let ";
 
-		ret += val + " ";
+		ret += val + " = ";
 		ret += m1.toString() + " in ";
 		ret += m2.toString();
 

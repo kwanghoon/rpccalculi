@@ -17,6 +17,16 @@ public class EncMain {
 			else
 				return mVar;
 		}
+		else if (m instanceof Lam) {
+			Lam mLam = (Lam) m;
+			
+			if (mLam.getStrArr().contains(x)) {
+				return new Lam(mLam.getLoc(), mLam.getStrArr(), mLam.getTerm());
+			}
+			else {
+				return new Lam(mLam.getLoc(), mLam.getStrArr(), subst(mLam.getTerm(), x, v));
+			}
+		}
 		else if (m instanceof Call) {
 			Call mCall = (Call) m;
 

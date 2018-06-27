@@ -42,6 +42,7 @@ public class Lam extends EncValue {
 
 	@Override
 	public String toString() {
+		int cnt = 0;
 		String ret = "lam^";
 
 		if (loc == Location.Client)
@@ -51,7 +52,12 @@ public class Lam extends EncValue {
 
 		ret += "(";
 		for (String s : strArr) {
-			ret += s + " ";
+			ret += s;
+			
+			if (strArr.size() - 1 != cnt) {
+				ret += " ";
+				cnt++;
+			}
 		}
 		ret += ").";
 		ret += term.toString();

@@ -1,5 +1,11 @@
 package com.example.rpc;
 
+import com.example.encrpc.CompEncTerm;
+import com.example.encrpc.EncTerm;
+import com.example.encrpc.TypedRPCEnc;
+import com.example.starpc.CompStaTerm;
+import com.example.starpc.StaTerm;
+import com.example.starpc.TypedRPCSta;
 import com.example.typedrpc.Infer;
 
 public class Main {
@@ -84,8 +90,12 @@ public class Main {
 		
 		
 		System.out.println("----EncTerm----");
-		System.out.println(com.example.encrpc.CompEncTerm.compEncTerm(tym));
+		EncTerm encTerm = CompEncTerm.compEncTerm(tym);
+		System.out.println(encTerm);
+		System.out.println(TypedRPCEnc.eval(encTerm));
 		System.out.println("----StaTerm----");
-		System.out.println(com.example.starpc.CompStaTerm.compStaTerm(tym));
+		StaTerm staTerm = CompStaTerm.compStaTerm(tym);
+		System.out.println(staTerm);
+		System.out.println(TypedRPCSta.eval(staTerm));
 	}
 }

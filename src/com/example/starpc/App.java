@@ -30,10 +30,16 @@ public class App extends StaTerm {
 
 	@Override
 	public String toString() {
+		int cnt = 0;
 		String ret = "(" + f.toString() + ") (";
 		
 		for(StaValue sv: ws) {
-			ret += sv.toString() + " ";
+			ret += sv.toString();
+			
+			if (ws.size() - 1 != cnt) {
+				ret += " ";
+				cnt++;
+			}
 		}
 		
 		ret += ")";

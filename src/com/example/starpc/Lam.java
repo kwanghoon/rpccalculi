@@ -42,6 +42,7 @@ public class Lam extends StaValue {
 
 	@Override
 	public String toString() {
+		int cnt = 0;
 		String ret = "lam^";
 		
 		if (loc == Location.Client)
@@ -50,8 +51,14 @@ public class Lam extends StaValue {
 			ret += "s";
 		
 		ret += "(";
-		for(String s: xs)
-			ret += s + " ";
+		for(String s: xs) {
+			ret += s;
+			
+			if (xs.size() - 1 != cnt) {
+				ret += " ";
+				cnt++;
+			}
+		}
 		
 		ret += ")." + m.toString();
 		

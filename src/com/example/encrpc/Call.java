@@ -30,10 +30,16 @@ public class Call extends EncTerm {
 
 	@Override
 	public String toString() {
+		int cnt = 0;
 		String ret = "Call(" + call.toString() + ") (";
 
 		for (EncValue ev : args) {
-			ret += ev.toString() + " ";
+			ret += ev.toString();
+			
+			if (args.size() - 1 != cnt) {
+				ret += " ";
+				cnt++;
+			}
 		}
 
 		ret += ")";

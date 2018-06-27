@@ -30,12 +30,18 @@ public class Req extends EncTerm {
 
 	@Override
 	public String toString() {
+		int cnt = 0;
 		String ret = "Req(";
 		ret += req.toString();
 		ret += ") (";
 
 		for (EncValue ev : args) {
-			ret += ev.toString() + " ";
+			ret += ev.toString();
+			
+			if (args.size() - 1 != cnt) {
+				ret += " ";
+				cnt++;
+			}
 		}
 
 		ret += ")";

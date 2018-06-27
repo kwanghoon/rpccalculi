@@ -30,10 +30,17 @@ public class Call extends StaTerm {
 
 	@Override
 	public String toString() {
+		int cnt = 0;
 		String ret = "Call(" + f.toString() + ") (";
 		
-		for(StaValue sv: ws)
-			ret += sv.toString() + " ";
+		for(StaValue sv: ws) {
+			ret += sv.toString();
+			
+			if (ws.size() - 1 != cnt) {
+				ret += " ";
+				cnt++;
+			}
+		}
 		ret += ")";
 		
 		return ret;

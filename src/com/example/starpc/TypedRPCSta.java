@@ -17,11 +17,11 @@ public class TypedRPCSta {
 			StaTerm v = either.getEither().getLeft().getKey();
 			ServerContext serverCtx_ = either.getEither().getLeft().getValue();
 
-			if (v instanceof Lam) {
+			if (v instanceof Lam && serverCtx_.getServerContext().isEmpty()) {
 				Lam vLam = (Lam) v;
 				return vLam;
 			}
-			else if (v instanceof Const) {
+			else if (v instanceof Const && serverCtx_.getServerContext().isEmpty()) {
 				Const vConst = (Const) v;
 				return vConst;
 			}
@@ -72,7 +72,7 @@ public class TypedRPCSta {
 					Lam fLam = (Lam) mApp1.getF();
 					
 					if (fLam.getLoc() == Location.Client) {
-						Let retLet = new Let(x, (StaValue) StaMain.substs(fLam.getM(), fLam.getXs(), mApp1.getWs()), m2);
+						Let retLet = new Let(x, StaMain.substs(fLam.getM(), fLam.getXs(), mApp1.getWs()), m2);
 						Pair<StaTerm, ServerContext> p = new Pair<>(retLet, serverCtx);
 						
 						retEither.getEither().setLeft(p);
@@ -175,7 +175,7 @@ public class TypedRPCSta {
 					
 					if (fLam.getLoc() == Location.Client) {
 						Ctx ctx = clientCtx.getContext().getCtx();
-						Context context = serverCtx.getServerContext().pop();
+						serverCtx.getServerContext().push(new Context(new Ctx(x, m2)));
 						Let retLet = new Let(ctx.getX(), new App(fLam, mCall1.getWs()), ctx.getM());
 						
 						Pair<StaTerm, ServerContext> p = new Pair<>(retLet, serverCtx);

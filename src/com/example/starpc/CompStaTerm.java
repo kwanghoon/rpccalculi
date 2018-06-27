@@ -79,7 +79,7 @@ public class CompStaTerm {
 				}
 				else {
 					Let retLet = new Let(fvar, p1.getValue(),
-							new Let(rvar, p2.getValue(), new Let(rvar, new Req(f, xs), r)));
+							new Let(xvar, p2.getValue(), new Let(rvar, new Req(f, xs), r)));
 					retPair = new Pair<>(p2.getKey(), retLet);
 				}
 

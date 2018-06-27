@@ -113,63 +113,52 @@ public class CompEncTerm {
 
 		if (tt instanceof com.example.typedrpc.Const) {
 			com.example.typedrpc.Const ttConst = (com.example.typedrpc.Const) tt;
-
-			String rvar = "r" + i;
-			Var r = new Var(rvar);
-			int j = i + 1;
+			
 			ArrayList<EncValue> appXs = new ArrayList<>();
 			appXs.add(new Const(ttConst.getI()));
-
-			retPair = new Pair<>(j, new Let(rvar, new App((EncValue) k, appXs), r));
+			
+			retPair = new Pair<>(i, new App((EncValue) k, appXs));
 
 			return retPair;
 		}
 		else if (tt instanceof com.example.typedrpc.Var) {
 			com.example.typedrpc.Var ttVar = (com.example.typedrpc.Var) tt;
 
-			String rvar = "r" + i;
-			Var r = new Var(rvar);
-			int j = i + 1;
 			ArrayList<EncValue> appXs = new ArrayList<>();
 			appXs.add(new Var(ttVar.getVar()));
-
-			retPair = new Pair<>(j, new Let(rvar, new App((EncValue) k, appXs), r));
-
+			
+			retPair = new Pair<>(i, new App((EncValue) k, appXs));
+			
 			return retPair;
 		}
 		else if (tt instanceof com.example.typedrpc.Lam) {
 			com.example.typedrpc.Lam ttLam = (com.example.typedrpc.Lam) tt;
 
 			if (ttLam.getLoc() == Location.Client) {
-				String rvar = "r" + i;
-				Var r = new Var(rvar);
+				Pair<Integer, EncTerm> p = compClient(i, ttLam.getTypedTerm());
 
-				Pair<Integer, EncTerm> p = compClient(i + 1, ttLam.getTypedTerm());
-
-				ArrayList<EncValue> appXs = new ArrayList<>();
 				ArrayList<String> lamXs = new ArrayList<>();
-
 				lamXs.add(ttLam.getX());
-				appXs.add(new Lam(Location.Client, lamXs, p.getValue()));
+				
+				ArrayList<EncValue> appXs = new ArrayList<>();
+				appXs.add(new Lam(ttLam.getLoc(), lamXs, p.getValue()));
 
-				retPair = new Pair<>(p.getKey(), new Let(rvar, new App((EncValue) k, appXs), r));
+				retPair = new Pair<>(p.getKey(), new App((EncValue) k, appXs));
 			}
 			else {
-				String rvar = "r" + i;
-				String contkvar = "k" + (i + 1);
-				Var r = new Var(rvar);
+				String contkvar = "k" + i;
 				Var contk = new Var(contkvar);
 
-				Pair<Integer, EncTerm> p = compServer(i + 3, ttLam.getTypedTerm(), contk);
+				Pair<Integer, EncTerm> p = compServer(i + 1, ttLam.getTypedTerm(), contk);
 
 				ArrayList<EncValue> appXs = new ArrayList<>();
 				ArrayList<String> lamXs = new ArrayList<>();
 
 				lamXs.add(ttLam.getX());
 				lamXs.add(contkvar);
-				appXs.add(new Lam(Location.Server, lamXs, p.getValue()));
+				appXs.add(new Lam(ttLam.getLoc(), lamXs, p.getValue()));
 
-				retPair = new Pair<>(p.getKey(), new Let(rvar, new App((EncValue) k, appXs), r));
+				retPair = new Pair<>(p.getKey(), new App((EncValue) k, appXs));
 			}
 
 			return retPair;
@@ -217,17 +206,14 @@ public class CompEncTerm {
 					retPair = compServer(p.getKey(), ttApp.getFun(), fncont);
 				}
 				else {
-					String rvar = "r" + (i + 2);
-					Var r = new Var(rvar);
-
 					ArrayList<String> aLamXs = new ArrayList<>();
 					ArrayList<EncValue> aAppXs = new ArrayList<>();
 					aLamXs.add(xvar);
 					aAppXs.add(x);
 					aAppXs.add((EncValue) k);
 
-					Lam argcont = new Lam(Location.Server, aLamXs, new Let(rvar, new App(f, aAppXs), r));
-					Pair<Integer, EncTerm> p = compServer(i + 3, ttApp.getArg(), argcont);
+					Lam argcont = new Lam(Location.Server, aLamXs, new App((EncValue) f, aAppXs));
+					Pair<Integer, EncTerm> p = compServer(i + 2, ttApp.getArg(), argcont);
 
 					ArrayList<String> fLamXs = new ArrayList<>();
 					fLamXs.add(fvar);

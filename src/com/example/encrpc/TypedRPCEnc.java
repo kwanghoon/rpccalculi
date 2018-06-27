@@ -70,7 +70,7 @@ public class TypedRPCEnc {
 					Lam rLam = (Lam) req1.getReq();
 
 					retEither.setRight(new Pair<>(new ClientContext(new Ctx(mLet.getVal(), mLet.getM2())),
-							new Let("r", new App(rLam, req1.getArgs()), new Var("r"))));
+							new App(rLam, req1.getArgs())));
 
 					return retEither;
 				}
@@ -104,42 +104,16 @@ public class TypedRPCEnc {
 	public static Either<EncTerm, Pair<ClientContext, EncTerm>> evalServer(ClientContext ctx, EncTerm m) {
 		Either<EncTerm, Pair<ClientContext, EncTerm>> retEither = new Either<>();
 
-		if (m instanceof Let) {
-			Let mLet = (Let) m;
-
-			if (mLet.getM1() instanceof App) {
-				App mApp1 = (App) mLet.getM1();
-
-				if (mApp1.getFun() instanceof Lam) {
-					Lam fLam = (Lam) mApp1.getFun();
-
-					if (fLam.getLoc() == Location.Server) {
-						retEither.setRight(new Pair<>(ctx, new Let(mLet.getVal(),
-								EncMain.substs(fLam.getTerm(), fLam.getStrArr(), mApp1.getArgs()), mLet.getM2())));
-					}
-				}
+		if (m instanceof App) {
+			App mApp = (App) m;
+			
+			if (mApp.getFun() instanceof Lam && ((Lam) mApp.getFun()).getLoc() == Location.Server) {
+				Lam fLam = (Lam) mApp.getFun();
+				
+				retEither.setRight(new Pair<>(ctx, EncMain.substs(fLam.getTerm(), fLam.getStrArr(), mApp.getArgs())));
+				
+				return retEither;
 			}
-			else if (mLet.getM1() instanceof Lam) {
-				Lam mLam1 = (Lam) mLet.getM1();
-
-				retEither.setRight(new Pair<>(ctx, EncMain.subst(mLet.getM2(), mLet.getVal(), mLam1)));
-			}
-			else if (mLet.getM1() instanceof Const) {
-				Const mConst1 = (Const) mLet.getM1();
-
-				retEither.setRight(new Pair<>(ctx, EncMain.subst(mLet.getM2(), mLet.getVal(), mConst1)));
-			}
-			else if (mLet.getM1() instanceof Let) {
-				Let mLet1 = (Let) mLet.getM1();
-
-				retEither.setRight(new Pair<>(ctx,
-						new Let(mLet1.getVal(), mLet1.getM1(), new Let(mLet.getVal(), mLet1.getM2(), mLet.getM2()))));
-			}
-			else if (mLet.getM1() instanceof Call) {
-				retEither = evalServerEta(ctx, mLet);
-			}
-
-			return retEither;
 		}
 		else {
 			if (m instanceof Call) {
@@ -149,7 +123,8 @@ public class TypedRPCEnc {
 					Lam cLam = (Lam) mCall.getCall();
 
 					if (cLam.getLoc() == Location.Client)
-						retEither.setLeft(new Let(ctx.getCtx().getX(), new App(cLam, mCall.getArgs()), ctx.getCtx().getM()));
+						retEither.setLeft(
+								new Let(ctx.getCtx().getX(), new App(cLam, mCall.getArgs()), ctx.getCtx().getM()));
 				}
 			}
 			else if (m instanceof Lam) {
@@ -164,30 +139,7 @@ public class TypedRPCEnc {
 
 			return retEither;
 		}
-	}
-
-	public static Either<EncTerm, Pair<ClientContext, EncTerm>> evalServerEta(ClientContext ctx, EncTerm encm) {
-		if (encm instanceof Let) {
-			Let etLet = (Let) encm;
-
-			if (etLet.getM1() instanceof Call && etLet.getM2() instanceof Var) {
-				Call etCall = (Call) etLet.getM1();
-				Var etVar = (Var) etLet.getM2();
-
-				if (etVar.getX() == etLet.getVal())
-					return evalServer(ctx, etCall);
-			}
-			else if (etLet.getM1() instanceof Call && etLet.getM2() instanceof Let) {
-				Let etLet2 = (Let) etLet.getM2();
-
-				if (etLet2.getM1() instanceof Var) {
-					Var etVar1 = (Var) etLet2.getM1();
-
-					if (etLet.getVal() == etVar1.getX())
-						return evalServerEta(ctx, new Let(etLet2.getVal(), etLet.getM1(), etLet2.getM2()));
-				}
-			}
-		}
+		
 		return null;
 	}
 }

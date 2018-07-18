@@ -8,7 +8,7 @@ import com.example.typedrpc.TypedTerm;
 
 import javafx.util.Pair;
 
-public class CompEncTerm {
+public class CompRPCEncTerm {
 	public static EncTerm compEncTerm(TypedTerm tt) {
 		EncTerm et = compClient(1, tt).getValue();
 

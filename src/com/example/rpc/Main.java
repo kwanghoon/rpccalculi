@@ -1,12 +1,14 @@
 package com.example.rpc;
 
-import com.example.encrpc.CompEncTerm;
-import com.example.encrpc.EncTerm;
+import com.example.enccs.CompCSEncTerm;
+import com.example.enccs.EncTerm;
+import com.example.enccs.TypedCSEnc;
+import com.example.encrpc.CompRPCEncTerm;
 import com.example.encrpc.TypedRPCEnc;
-import com.example.starpc.CompStaTerm;
-import com.example.starpc.StaTerm;
+import com.example.starpc.CompRPCStaTerm;
 import com.example.starpc.TypedRPCSta;
 import com.example.typedrpc.Infer;
+import com.example.utils.TripleTup;
 
 public class Main {
 	public static Value eval(Term m, Location loc) {
@@ -88,14 +90,39 @@ public class Main {
 		com.example.typedrpc.TypedTerm tym = Infer.infer(ex1);
 		System.out.println(tym.toString());
 		
-		
-		System.out.println("----EncTerm----");
-		EncTerm encTerm = CompEncTerm.compEncTerm(tym);
+		System.out.println("----RPC EncTerm----");
+		com.example.encrpc.EncTerm encTerm = CompRPCEncTerm.compEncTerm(tym);
 		System.out.println(encTerm);
 		System.out.println(TypedRPCEnc.eval(encTerm));
-		System.out.println("----StaTerm----");
-		StaTerm staTerm = CompStaTerm.compStaTerm(tym);
+		System.out.println("----RPC StaTerm----");
+		com.example.starpc.StaTerm staTerm = CompRPCStaTerm.compStaTerm(tym);
 		System.out.println(staTerm);
 		System.out.println(TypedRPCSta.eval(staTerm));
+		
+//		TripleTup<com.example.stacs.StaTerm, com.example.stacs.FunStore, com.example.stacs.FunStore> csStaTerm = CompCSStaTerm.compCSStaTerm(staTerm);
+//		System.out.println("----CS StaTerm----");
+//		System.out.println("client function store: ");
+//		System.out.println(csStaTerm.getSecond());
+//		System.out.println("server function store: ");
+//		System.out.println(csStaTerm.getThird());
+//		
+//		System.out.println("main client expression: ");
+//		System.out.println(csStaTerm.getFirst().toString());
+//		System.out.println("evaluates to ");
+//		com.example.stacs.StaTerm csstav = TypedCSSta.eval(csStaTerm.getSecond(), csStaTerm.getThird(), csStaTerm.getFirst());
+//		System.out.println(csstav);
+//		
+		TripleTup<EncTerm, com.example.enccs.FunStore, com.example.enccs.FunStore> csEncTerm = CompCSEncTerm.compCSEncTerm(encTerm);
+		System.out.println("----CS EncTerm----");
+		System.out.println("client function store: ");
+		System.out.println(csEncTerm.getSecond());
+		System.out.println("server function store: ");
+		System.out.println(csEncTerm.getThird());
+		
+		System.out.println("main client expression: ");
+		System.out.println(csEncTerm.getFirst().toString());
+		System.out.println("evaluates to ");
+		com.example.enccs.EncTerm csencv = TypedCSEnc.eval(csEncTerm.getSecond(), csEncTerm.getThird(), csEncTerm.getFirst());
+		System.out.println(csencv);
 	}
 }

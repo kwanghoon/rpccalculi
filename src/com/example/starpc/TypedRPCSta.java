@@ -72,7 +72,7 @@ public class TypedRPCSta {
 					Lam fLam = (Lam) mApp1.getF();
 					
 					if (fLam.getLoc() == Location.Client) {
-						Let retLet = new Let(x, StaMain.substs(fLam.getM(), fLam.getXs(), mApp1.getWs()), m2);
+						Let retLet = new Let(x, RPCStaMain.substs(fLam.getM(), fLam.getXs(), mApp1.getWs()), m2);
 						Pair<StaTerm, ServerContext> p = new Pair<>(retLet, serverCtx);
 						
 						retEither.getEither().setLeft(p);
@@ -103,7 +103,7 @@ public class TypedRPCSta {
 			else if (m1 instanceof Lam) {
 				Lam mLam1 = (Lam) m1;
 				
-				Pair<StaTerm, ServerContext> p = new Pair<>(StaMain.subst(m2, x, mLam1), serverCtx);
+				Pair<StaTerm, ServerContext> p = new Pair<>(RPCStaMain.subst(m2, x, mLam1), serverCtx);
 				retEither.getEither().setLeft(p);
 				
 				return retEither;
@@ -111,7 +111,7 @@ public class TypedRPCSta {
 			else if (m1 instanceof Const) {
 				Const mConst1 = (Const) m1;
 				
-				Pair<StaTerm, ServerContext> p = new Pair<>(StaMain.subst(m2, x, mConst1), serverCtx);
+				Pair<StaTerm, ServerContext> p = new Pair<>(RPCStaMain.subst(m2, x, mConst1), serverCtx);
 				retEither.getEither().setLeft(p);
 				
 				return retEither;
@@ -158,7 +158,7 @@ public class TypedRPCSta {
 					Lam fLam = (Lam) mApp1.getF();
 					
 					if (fLam.getLoc() == Location.Server) {
-						Let retLet = new Let(x, StaMain.substs(fLam.getM(), fLam.getXs(), mApp1.getWs()), mLet.getM2());
+						Let retLet = new Let(x, RPCStaMain.substs(fLam.getM(), fLam.getXs(), mApp1.getWs()), mLet.getM2());
 						TripleTup<ClientContext, ServerContext, StaTerm> t = new TripleTup<>(clientCtx, serverCtx, retLet);
 						
 						retEither.getEither().setRight(t);
@@ -187,7 +187,7 @@ public class TypedRPCSta {
 			}
 			else if (m1 instanceof Lam) {
 				Lam mLam1 = (Lam) m1;
-				StaTerm st = StaMain.subst(m2, x, mLam1);
+				StaTerm st = RPCStaMain.subst(m2, x, mLam1);
 								
 				TripleTup<ClientContext, ServerContext, StaTerm> t = new TripleTup<>(clientCtx, serverCtx, st);
 				retEither.getEither().setRight(t);
@@ -196,7 +196,7 @@ public class TypedRPCSta {
 			}
 			else if (m1 instanceof Const) {
 				Const mConst1 = (Const) m1;
-				StaTerm st = StaMain.subst(m2, x, mConst1);
+				StaTerm st = RPCStaMain.subst(m2, x, mConst1);
 				
 				TripleTup<ClientContext, ServerContext, StaTerm> t = new TripleTup<>(clientCtx, serverCtx, st);
 				retEither.getEither().setRight(t);

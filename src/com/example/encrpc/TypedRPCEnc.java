@@ -58,7 +58,7 @@ public class TypedRPCEnc {
 					Lam fLam = (Lam) app1.getFun();
 
 					retEither.setLeft(new Let(mLet.getVal(),
-							EncMain.substs(fLam.getTerm(), fLam.getStrArr(), app1.getArgs()), mLet.getM2()));
+							RPCEncMain.substs(fLam.getTerm(), fLam.getStrArr(), app1.getArgs()), mLet.getM2()));
 
 					return retEither;
 				}
@@ -78,14 +78,14 @@ public class TypedRPCEnc {
 			else if (mLet.getM1() instanceof Lam) {
 				Lam lam1 = (Lam) mLet.getM1();
 
-				retEither.setLeft(EncMain.subst(mLet.getM2(), mLet.getVal(), lam1));
+				retEither.setLeft(RPCEncMain.subst(mLet.getM2(), mLet.getVal(), lam1));
 
 				return retEither;
 			}
 			else if (mLet.getM1() instanceof Const) {
 				Const const1 = (Const) mLet.getM1();
 
-				retEither.setLeft(EncMain.subst(mLet.getM2(), mLet.getVal(), const1));
+				retEither.setLeft(RPCEncMain.subst(mLet.getM2(), mLet.getVal(), const1));
 
 				return retEither;
 			}
@@ -110,7 +110,7 @@ public class TypedRPCEnc {
 			if (mApp.getFun() instanceof Lam && ((Lam) mApp.getFun()).getLoc() == Location.Server) {
 				Lam fLam = (Lam) mApp.getFun();
 				
-				retEither.setRight(new Pair<>(ctx, EncMain.substs(fLam.getTerm(), fLam.getStrArr(), mApp.getArgs())));
+				retEither.setRight(new Pair<>(ctx, RPCEncMain.substs(fLam.getTerm(), fLam.getStrArr(), mApp.getArgs())));
 				
 				return retEither;
 			}

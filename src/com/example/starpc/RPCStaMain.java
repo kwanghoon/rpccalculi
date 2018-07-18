@@ -2,7 +2,7 @@ package com.example.starpc;
 
 import java.util.ArrayList;
 
-public class StaMain {
+public class RPCStaMain {
 	public static StaTerm subst(StaTerm m, String x, StaValue v) {
 		if (m instanceof Const) {
 			Const mconst = (Const) m;

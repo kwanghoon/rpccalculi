@@ -2,7 +2,7 @@ package com.example.encrpc;
 
 import java.util.ArrayList;
 
-public class EncMain {
+public class RPCEncMain {
 	public static EncTerm subst(EncTerm m, String x, EncValue v) {
 		if (m instanceof Const) {
 			Const mConst = (Const) m;

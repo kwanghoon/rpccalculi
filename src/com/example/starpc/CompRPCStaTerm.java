@@ -7,7 +7,7 @@ import com.example.typedrpc.TypedTerm;
 
 import javafx.util.Pair;
 
-public class CompStaTerm {
+public class CompRPCStaTerm {
 	public static StaTerm compStaTerm(TypedTerm tt) {
 		Pair<Integer, StaTerm> p = compClient(1, tt);
 

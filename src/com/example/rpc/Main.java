@@ -99,6 +99,7 @@ public class Main {
 		System.out.println(staTerm);
 		System.out.println(TypedRPCSta.eval(staTerm));
 		
+//		System.out.println("In Stateful CS: ");
 //		TripleTup<com.example.stacs.StaTerm, com.example.stacs.FunStore, com.example.stacs.FunStore> csStaTerm = CompCSStaTerm.compCSStaTerm(staTerm);
 //		System.out.println("----CS StaTerm----");
 //		System.out.println("client function store: ");
@@ -111,7 +112,8 @@ public class Main {
 //		System.out.println("evaluates to ");
 //		com.example.stacs.StaTerm csstav = TypedCSSta.eval(csStaTerm.getSecond(), csStaTerm.getThird(), csStaTerm.getFirst());
 //		System.out.println(csstav);
-//		
+		
+		System.out.println("In Encoding CS: ");
 		TripleTup<EncTerm, com.example.enccs.FunStore, com.example.enccs.FunStore> csEncTerm = CompCSEncTerm.compCSEncTerm(encTerm);
 		System.out.println("----CS EncTerm----");
 		System.out.println("client function store: ");

@@ -20,7 +20,6 @@ public class TypedCSEnc {
 	public static EncTerm repEvalClient(FunStore clientFS, FunStore serverFS, EncTerm m) {
 		Either<EncTerm, Pair<ClientContext, EncTerm>> either = evalClient(clientFS, m);
 
-		System.out.println(m.toString() + ", " + m.getClass());
 		if (either.isLeft()) {
 			EncTerm left = either.getLeft();
 			
@@ -64,7 +63,6 @@ public class TypedCSEnc {
 			if (m1 instanceof App) {
 				App mApp1 = (App) m1;
 
-				System.out.println("evalClient: " + mApp1.getFun().getClass());
 				if (mApp1.getFun() instanceof Clo) {
 					Clo funClo = (Clo) mApp1.getFun();
 					ClosedFun closedFun = lookup(phi, funClo.getF());

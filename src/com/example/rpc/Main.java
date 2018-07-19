@@ -5,6 +5,8 @@ import com.example.enccs.EncTerm;
 import com.example.enccs.TypedCSEnc;
 import com.example.encrpc.CompRPCEncTerm;
 import com.example.encrpc.TypedRPCEnc;
+import com.example.stacs.CompCSStaTerm;
+import com.example.stacs.TypedCSSta;
 import com.example.starpc.CompRPCStaTerm;
 import com.example.starpc.TypedRPCSta;
 import com.example.typedrpc.Infer;
@@ -99,19 +101,19 @@ public class Main {
 		System.out.println(staTerm);
 		System.out.println(TypedRPCSta.eval(staTerm));
 		
-//		System.out.println("In Stateful CS: ");
-//		TripleTup<com.example.stacs.StaTerm, com.example.stacs.FunStore, com.example.stacs.FunStore> csStaTerm = CompCSStaTerm.compCSStaTerm(staTerm);
-//		System.out.println("----CS StaTerm----");
-//		System.out.println("client function store: ");
-//		System.out.println(csStaTerm.getSecond());
-//		System.out.println("server function store: ");
-//		System.out.println(csStaTerm.getThird());
-//		
-//		System.out.println("main client expression: ");
-//		System.out.println(csStaTerm.getFirst().toString());
-//		System.out.println("evaluates to ");
-//		com.example.stacs.StaTerm csstav = TypedCSSta.eval(csStaTerm.getSecond(), csStaTerm.getThird(), csStaTerm.getFirst());
-//		System.out.println(csstav);
+		System.out.println("In Stateful CS: ");
+		TripleTup<com.example.stacs.StaTerm, com.example.stacs.FunStore, com.example.stacs.FunStore> csStaTerm = CompCSStaTerm.compCSStaTerm(staTerm);
+		System.out.println("----CS StaTerm----");
+		System.out.println("client function store: ");
+		System.out.println(csStaTerm.getSecond());
+		System.out.println("server function store: ");
+		System.out.println(csStaTerm.getThird());
+		
+		System.out.println("main client expression: ");
+		System.out.println(csStaTerm.getFirst().toString());
+		System.out.println("evaluates to ");
+		com.example.stacs.StaTerm csstav = TypedCSSta.eval(csStaTerm.getSecond(), csStaTerm.getThird(), csStaTerm.getFirst());
+		System.out.println(csstav);
 		
 		System.out.println("In Encoding CS: ");
 		TripleTup<EncTerm, com.example.enccs.FunStore, com.example.enccs.FunStore> csEncTerm = CompCSEncTerm.compCSEncTerm(encTerm);

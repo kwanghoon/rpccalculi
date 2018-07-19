@@ -2,6 +2,8 @@ package com.example.enccs;
 
 import java.util.ArrayList;
 
+import javafx.util.Pair;
+
 public class CSEncMain {
 	public static EncTerm subst(EncTerm m, String x, EncValue v) {
 		if (m instanceof Const) {
@@ -91,17 +93,20 @@ public class CSEncMain {
 	}
 
 	public static EncTerm substs(EncTerm m, ArrayList<String> xs, ArrayList<EncValue> vs) {
-		if (xs.isEmpty() || vs.isEmpty()) {
-			return m;
+		ArrayList<Pair<String, EncValue>> pairList = new ArrayList<>();
+		for (int i = 0; i < xs.size(); i++) {
+			pairList.add(new Pair<>(xs.get(i), vs.get(i)));
 		}
-		else {
-			String x = xs.get(0);
-			EncValue v = vs.get(0);
-			
-			xs.remove(x);
-			vs.remove(v);
-			
-			return substs(subst(m, x, v), xs, vs);
+		
+		EncTerm encTerm = m;
+		
+		for (Pair<String, EncValue> p:pairList) {
+			String x = p.getKey();
+			EncValue v = p.getValue();
+
+			encTerm = subst(encTerm, x, v);
 		}
+		
+		return encTerm;
 	}
 }

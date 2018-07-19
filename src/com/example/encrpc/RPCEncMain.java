@@ -2,6 +2,8 @@ package com.example.encrpc;
 
 import java.util.ArrayList;
 
+import javafx.util.Pair;
+
 public class RPCEncMain {
 	public static EncTerm subst(EncTerm m, String x, EncValue v) {
 		if (m instanceof Const) {
@@ -93,24 +95,22 @@ public class RPCEncMain {
 		return null;
 	}
 
+	// xs, vs != null
 	public static EncTerm substs(EncTerm m, ArrayList<String> xs, ArrayList<EncValue> vs) {
-		if ((xs == null || xs.isEmpty()) && (vs == null || vs.isEmpty()))
-			return m;
-		else {
-			if (xs.size() == vs.size()) {
-				String x = xs.get(0);
-				EncValue v = vs.get(0);
-
-				xs.remove(x);
-				vs.remove(v);
-
-				EncTerm eTerm = subst(m, x, v);
-
-				return substs(eTerm, xs, vs);
-			}
-			else
-				System.out.println("Error in substs: the lengths of vars and vals are different");
+		ArrayList<Pair<String, EncValue>> pairList = new ArrayList<>();
+		for (int i = 0; i < xs.size(); i++) {
+			pairList.add(new Pair<>(xs.get(i), vs.get(i)));
 		}
-		return null;
+		
+		EncTerm encTerm = m;
+		
+		for (Pair<String, EncValue> p:pairList) {
+			String x = p.getKey();
+			EncValue v = p.getValue();
+
+			encTerm = subst(encTerm, x, v);
+		}
+		
+		return encTerm;
 	}
 }

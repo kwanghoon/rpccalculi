@@ -186,7 +186,7 @@ public class TypedCSSta {
 			else if (m1 instanceof Clo) {
 				Clo mClo1 = (Clo) m1;
 				
-				StaTerm st = CSStaMain.subst(m,  mLet.getY(),  mClo1);
+				StaTerm st = CSStaMain.subst(mLet.getM2(), mLet.getY(),  mClo1);
 				TripleTup<ClientContext, ServerContext, StaTerm> right = new TripleTup<>(clientCtx, serverCtx, st);
 				
 				either.getEither().setRight(right);
@@ -196,7 +196,7 @@ public class TypedCSSta {
 			else if (m1 instanceof Const) {
 				Const mConst1 = (Const) m1;
 				
-				StaTerm st = CSStaMain.subst(m, mLet.getY(), mConst1);
+				StaTerm st = CSStaMain.subst(mLet.getM2(), mLet.getY(), mConst1);
 				TripleTup<ClientContext, ServerContext, StaTerm> right = new TripleTup<>(clientCtx, serverCtx, st);
 				
 				either.getEither().setRight(right);

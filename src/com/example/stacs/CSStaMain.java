@@ -2,6 +2,8 @@ package com.example.stacs;
 
 import java.util.ArrayList;
 
+import javafx.util.Pair;
+
 public class CSStaMain {
 	public static StaTerm subst(StaTerm m, String x, StaValue v) {
 		if (m instanceof Const) {
@@ -104,16 +106,20 @@ public class CSStaMain {
 	}
 	
 	public static StaTerm substs(StaTerm m, ArrayList<String> xs, ArrayList<StaValue> vs) {
-		if (xs.isEmpty() || vs.isEmpty())
-			return m;
-		else {
-			String x = xs.get(0);
-			StaValue v = vs.get(0);
-			
-			xs.remove(x);
-			vs.remove(v);
-			
-			return substs(subst(m, x, v), xs, vs);
+		ArrayList<Pair<String, StaValue>> pairList = new ArrayList<>();
+		for (int i = 0; i < xs.size(); i++) {
+			pairList.add(new Pair<>(xs.get(i), vs.get(i)));
 		}
+		
+		StaTerm staTerm = m;
+		
+		for (Pair<String, StaValue> p:pairList) {
+			String x = p.getKey();
+			StaValue v = p.getValue();
+
+			staTerm = subst(staTerm, x, v);
+		}
+		
+		return staTerm;
 	}
 }

@@ -1,5 +1,7 @@
 package com.example.rpc;
 
-public class Term {
+import com.rpc.parser.Stkelem;
+
+public class Term extends Stkelem {
 
 }

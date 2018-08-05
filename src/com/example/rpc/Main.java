@@ -1,5 +1,10 @@
 package com.example.rpc;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+
 import com.example.enccs.CompCSEncTerm;
 import com.example.enccs.EncTerm;
 import com.example.enccs.TypedCSEnc;
@@ -11,6 +16,11 @@ import com.example.starpc.CompRPCStaTerm;
 import com.example.starpc.TypedRPCSta;
 import com.example.typedrpc.Infer;
 import com.example.utils.TripleTup;
+import com.rpc.parser.Expr;
+import com.rpc.parser.LexerException;
+import com.rpc.parser.LexicalAnalyzer;
+import com.rpc.parser.Parser;
+import com.rpc.parser.ParserException;
 
 public class Main {
 	public static Value eval(Term m, Location loc) {
@@ -40,7 +50,7 @@ public class Main {
 		if (m instanceof Var) {
 			Var var = (Var) m;
 
-			if (var.getVar() == x) {
+			if (var.getVar().equals(x)) {
 				return v;
 			}
 			else {
@@ -50,7 +60,7 @@ public class Main {
 		else if (m instanceof Lam) {
 			Lam lam = (Lam) m;
 
-			if (lam.getX() == x) {
+			if (lam.getX().equals(x)) {
 				return lam;
 			}
 			else {
@@ -78,14 +88,20 @@ public class Main {
 			return null;
 	}
 
-	public static void main(String[] args) {
-		Term leftApp = new App(new Lam(Location.Server, "x", new Var("x")), new App(new Var("f"), new Const(1)));
-
-		Term left = new Lam(Location.Server, "f", leftApp);
-
-		Term right = new Lam(Location.Client, "y", new App(new Lam(Location.Server, "z", new Var("z")), new Var("y")));
-
-		Term ex1 = new App(left, right);
+	public static void main(String[] args) throws ParserException, IOException, LexerException {
+		StringReader sr = new StringReader("(lam^s f. (lam^s x. x) (f 1)) (lam^c y. (lam^s z. z) y)");
+		LexicalAnalyzer lexical = new LexicalAnalyzer(new InputStreamReader(System.in));
+		Parser parser = new Parser(lexical);
+		
+		Term ex1 = parser.Parsing();
+		
+//		Term leftApp = new App(new Lam(Location.Server, "x", new Var("x")), new App(new Var("f"), new Const(1)));
+//
+//		Term left = new Lam(Location.Server, "f", leftApp);
+//
+//		Term right = new Lam(Location.Client, "y", new App(new Lam(Location.Server, "z", new Var("z")), new Var("y")));
+//
+//		Term ex1 = new App(left, right);
 		System.out.println(ex1.toString());
 		System.out.println(eval(ex1, Location.Client).toString());
 

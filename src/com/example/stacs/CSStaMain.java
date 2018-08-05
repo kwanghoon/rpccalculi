@@ -13,7 +13,7 @@ public class CSStaMain {
 		else if (m instanceof Var) {
 			Var mVar = (Var) m;
 			
-			if (mVar.getX() == x)
+			if (mVar.getX().equals(x))
 				return v;
 			else
 				return mVar;
@@ -91,7 +91,7 @@ public class CSStaMain {
 			StaTerm m1 = subst(mLet.getM1(), x, v);
 			StaTerm m2;
 			
-			if (x == mLet.getY()) {
+			if (x.equals(mLet.getY())) {
 				m2 = mLet.getM2();
 			}
 			else

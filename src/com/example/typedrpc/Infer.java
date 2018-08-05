@@ -70,7 +70,7 @@ public class Infer {
 
 	public static Type tylookup(String x, TyEnv tyenv) {
 		for (Pair<String, Type> p : tyenv.getPairList()) {
-			if (p.getKey() == x)
+			if (p.getKey().equals(x))
 				return p.getValue();
 		}
 		return null;

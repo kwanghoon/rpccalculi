@@ -14,7 +14,7 @@ public class CSEncMain {
 		else if (m instanceof Var) {
 			Var mVar = (Var) m;
 			
-			if (mVar.getX() == x)
+			if (mVar.getX().equals(x))
 				return v;
 			else
 				return mVar;
@@ -79,7 +79,7 @@ public class CSEncMain {
 			EncTerm m1 = subst(mLet.getM1(), x, v);
 			EncTerm m2;
 			
-			if (mLet.getVal() == x)
+			if (mLet.getVal().equals(x))
 				m2 = mLet.getM2();
 			else
 				m2 = subst(mLet.getM2(), x, v);

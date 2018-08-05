@@ -14,7 +14,7 @@ public class RPCStaMain {
 		else if (m instanceof Var) {
 			Var mvar = (Var) m;
 
-			if (mvar.getX() == x)
+			if (mvar.getX().equals(x))
 				return v;
 			else
 				return mvar;
@@ -76,7 +76,7 @@ public class RPCStaMain {
 			StaTerm st1 = subst(mlet.getM1(), x, v);
 			StaTerm st2;
 			
-			if (mlet.getY() == x)
+			if (mlet.getY().equals(x))
 				st2 = mlet.getM2();
 			else
 				st2 = subst(mlet.getM2(), x, v);

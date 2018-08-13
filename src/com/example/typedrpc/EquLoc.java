@@ -26,4 +26,9 @@ public class EquLoc extends Equ {
 		this.tyloc2 = tyloc2;
 	}
 
+	@Override
+	public String toString() {
+		return tyloc1.toString() + " = " + tyloc2.toString();
+	}
+
 }

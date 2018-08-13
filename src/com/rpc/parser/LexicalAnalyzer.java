@@ -36,7 +36,7 @@ public class LexicalAnalyzer {
 		lineno = 1;
 
 		for (int idx = 0; idx < strArr.size(); idx++) {
-			String line = strArr.get(0);
+			String line = strArr.get(idx);
 			String str = "";
 			int strIdx = 0;
 			Token currentTok;

@@ -4,6 +4,8 @@ import com.example.rpc.Location;
 
 public class TypedRPCMain {
 	public static Type subst(Type t, int i, Type ty) {
+		check(i, ty);
+		
 		if (t instanceof IntType) {
 			IntType intType = (IntType) t;
 
@@ -19,7 +21,7 @@ public class TypedRPCMain {
 		}
 		else if (t instanceof FunType) {
 			FunType funType = (FunType) t;
-
+			
 			Type left = subst(funType.getLeft(), i, ty);
 			Type right = subst(funType.getRight(), i, ty);
 
@@ -83,20 +85,38 @@ public class TypedRPCMain {
 		else
 			return null;
 	}
-
-	public static void main(String[] args) {
-		TypedTerm leftApp = new App(new LocType(Location.Server),
-				new Lam(Location.Server, "x", new IntType(), new Var("x")),
-				new App(new LocType(Location.Client), new Var("f"), new Const(1)));
-
-		TypedTerm left = new Lam(Location.Server, "f", new IntType(), leftApp);
-
-		TypedTerm right = new Lam(Location.Client, "y", new IntType(), new App(new LocType(Location.Server),
-				new Lam(Location.Server, "z", new IntType(), new Var("z")), new Var("y")));
-
-		TypedTerm ex1 = new App(new LocType(Location.Client), left, right);
-		System.out.println(ex1.toString());
-		// System.out.println(eval(ex1, Location.Client).toString());
+	
+	public static void check(int i, Type ty) {
+		if (ty instanceof IntType) {
+			
+		}
+		else if (ty instanceof VarType) {
+			VarType vTy = (VarType) ty;
+			
+			if (vTy.getVar() == i)
+				throw new RuntimeException(i + " occurs in " + ty);
+		}
+		else if (ty instanceof FunType) {
+			FunType fTy = (FunType) ty;
+			
+			check(i, fTy.getLeft());
+			check(i, fTy.getRight());
+		}
+		
 	}
+//	public static void main(String[] args) {
+//		TypedTerm leftApp = new App(new LocType(Location.Server),
+//				new Lam(Location.Server, "x", new IntType(), new Var("x")),
+//				new App(new LocType(Location.Client), new Var("f"), new Const(1)));
+//
+//		TypedTerm left = new Lam(Location.Server, "f", new IntType(), leftApp);
+//
+//		TypedTerm right = new Lam(Location.Client, "y", new IntType(), new App(new LocType(Location.Server),
+//				new Lam(Location.Server, "z", new IntType(), new Var("z")), new Var("y")));
+//
+//		TypedTerm ex1 = new App(new LocType(Location.Client), left, right);
+//		System.out.println(ex1.toString());
+//		// System.out.println(eval(ex1, Location.Client).toString());
+//	}
 
 }

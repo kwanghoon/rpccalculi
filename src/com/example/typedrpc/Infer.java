@@ -53,7 +53,8 @@ public class Infer {
 			TyEnv tyenv1 = new TyEnv();
 
 			ArrayList<Pair<String, Type>> pairList = tyenv.getPairList();
-			pairList.add(new Pair<>(tyLam.getX(), argty));
+			pairList.add(0, new Pair<>(tyLam.getX(), argty));
+			
 			tyenv1.setPairList(pairList);
 
 			QuadTup<TypedTerm, Type, Equations, Integer> quad = genCst(n + 1, tyLam.getM(), tyenv1);
@@ -61,7 +62,9 @@ public class Infer {
 
 			ret = new QuadTup<>(new Lam(tyLam.getLoc(), tyLam.getX(), argty, quad.getFirst()), funty, quad.getThird(),
 					quad.getFourth());
-
+			
+			tyenv1.getPairList().remove(0);
+			
 			return ret;
 		}
 		else
@@ -86,15 +89,33 @@ public class Infer {
 
 	public static Equations solve(Equations equs) {
 		while (true) {
+//			printEqus(equs);
 			Pair<Equations, Boolean> p1 = unifyEqus(equs);
+//			printEqus(p1.getKey());
 			Pair<Equations, Boolean> p2 = mergeAll(p1.getKey());
+//			printEqus(p2.getKey());
+//			for (Equ eq: p2.getKey().getEqus()) {
+//				if (eq instanceof EquTy) {
+//					EquTy eqTy = (EquTy) eq;
+//					
+//					TypedRPCMain.check(((VarType) eqTy.getTy1()).getVar(), eqTy.getTy2());
+//				}
+//			}
+//			
 			Pair<Equations, Boolean> p3 = propagate(p2.getKey());
-
+//			printEqus(p3.getKey());
 			if (p1.getValue() || p2.getValue() || p3.getValue()) {
 				equs = p3.getKey();
 			}
 			else
 				return equs;
+		}
+	}
+	
+	private static void printEqus(Equations equs) {
+		System.out.println("-----");
+		for (Equ eq: equs.getEqus()) {
+			System.out.println(eq.toString());
 		}
 	}
 
@@ -285,6 +306,7 @@ public class Infer {
 					Pair<Equations, Boolean> p = unify(new EquTy(equty1.getTy2(), equty2.getTy2()));
 					retList = new ArrayList<>();
 					retList.addAll(p.getKey().getEqus());
+					retList.addAll(merg.getFirst().getEqus());
 
 					retTrip = new TripleTup<>(new Equations(retList), merg.getSecond(),
 							p.getValue() || merg.getThird());

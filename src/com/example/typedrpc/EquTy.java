@@ -26,4 +26,10 @@ public class EquTy extends Equ {
 		this.ty2 = ty2;
 	}
 
+	@Override
+	public String toString() {
+		return ty1.toString() + " = " + ty2.toString();
+	}
+	
+
 }

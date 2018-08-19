@@ -1,0 +1,1 @@
+(lam^c x1. x1) (lam^s y1. y1)

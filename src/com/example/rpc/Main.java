@@ -15,8 +15,6 @@ import com.example.starpc.TypedRPCSta;
 import com.example.typedrpc.Infer;
 import com.example.utils.TripleTup;
 import com.rpc.parser.LexerException;
-import com.rpc.parser.LexicalAnalyzer;
-import com.rpc.parser.Parser;
 import com.rpc.parser.ParserException;
 
 public class Main {
@@ -86,10 +84,10 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws ParserException, IOException, LexerException {
-		LexicalAnalyzer lexical = new LexicalAnalyzer(new InputStreamReader(System.in));
-				Parser parser = new Parser(lexical);
+//		LexicalAnalyzer lexical = new LexicalAnalyzer(new InputStreamReader(System.in));
+		Parser parser = new Parser();
 		
-		Term ex1 = parser.Parsing();
+		Term ex1 = parser.Parsing(new InputStreamReader(System.in));
 		
 		System.out.println(ex1.toString());
 		System.out.println(eval(ex1, Location.Client).toString());

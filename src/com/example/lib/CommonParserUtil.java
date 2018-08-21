@@ -307,6 +307,50 @@ public class CommonParserUtil {
 			goto_table.add(tmpLine);
 		}
 	}
+	
+	private void createGrammarRules() {
+//		CFG "L'" [
+//		          ProductionRule "L'" [Nonterminal "L"],
+//		          ProductionRule "L" [Nonterminal "E"],
+//		          ProductionRule "L" [Terminal "lam", Terminal "loc", Terminal "id", Terminal ".", Nonterminal "L"],
+//		          ProductionRule "E" [Nonterminal "E", Nonterminal "T"],
+//		          ProductionRule "E" [Nonterminal "T"],
+//		          ProductionRule "T" [Terminal "id"],
+//		          ProductionRule "T" [Terminal "num"],
+//		          ProductionRule "T" [Terminal "(", Nonterminal "L", Terminal ")"]
+//		      ]
+		Object[] objGrammar = treeBuilders.keySet().toArray();
+		
+		// HashMap은 안됨 Key가 겹쳐서 덮어씌워짐
+		ArrayList<String> nonterminals = new ArrayList<>();
+		
+		// nonterminal setting
+		for (int i = 0; i < objGrammar.length; i++) {
+			String grammar = (String) objGrammar[i];
+			String[] data = grammar.split(" -> "); // symbol -> g1 g2 g3 ...
+			
+			if (!nonterminals.contains(data[0].trim())) {
+				nonterminals.add(data[0].trim());
+			}
+		}
+		
+		String fileContent = "CFG \"" + startSymbol + "\" [";
+		
+		for (int i = 0; i < objGrammar.length; i++) {
+			String grammar = (String) objGrammar[i];
+			String[] data = grammar.split(" -> ");
+			
+			// data[0] 는 ProductionRule 태그 붙이기
+			// data[1] 은 공백으로 나눠 Nonterminal Terminal 판단 필요
+			
+			if (i < objGrammar.length - 1) {
+				fileContent += ",\n";
+			}
+			
+		}
+		
+		fileContent += "]";
+	}
 
 	private ParseState get_st(ParseState current_state, String index, ArrayList<Terminal> Tokens)
 			throws FileNotFoundException, ParserException {

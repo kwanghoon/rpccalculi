@@ -8,14 +8,14 @@ import com.example.enccs.EncTerm;
 import com.example.enccs.TypedCSEnc;
 import com.example.encrpc.CompRPCEncTerm;
 import com.example.encrpc.TypedRPCEnc;
+import com.example.lib.LexerException;
+import com.example.lib.ParserException;
 import com.example.stacs.CompCSStaTerm;
 import com.example.stacs.TypedCSSta;
 import com.example.starpc.CompRPCStaTerm;
 import com.example.starpc.TypedRPCSta;
 import com.example.typedrpc.Infer;
 import com.example.utils.TripleTup;
-import com.rpc.parser.LexerException;
-import com.rpc.parser.ParserException;
 
 public class Main {
 	public static Value eval(Term m, Location loc) {

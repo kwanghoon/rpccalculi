@@ -1,4 +1,4 @@
-package com.rpc.parser;
+package com.example.lib;
 
 public class LexerException extends Exception {
 	private String message;

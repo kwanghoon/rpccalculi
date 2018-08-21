@@ -1,4 +1,4 @@
-package com.rpc.parser;
+package com.example.lib;
 
 public class Terminal extends Stkelem {
 	private String syntax;

@@ -1,4 +1,4 @@
-package com.rpc.parser;
+package com.example.lib;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -8,11 +8,21 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.example.rpc.Token;
 
 public class CommonParserUtil {
+	// file names
+	private String fGrammarRules;
+	private String fActionTable;
+	private String fGotoTable;
+
 	// Lexer part
 	private int lineno;
 	private String endOfTok;
+	private TokenBuilder endOfTokenBuilder;
 
 	private BufferedReader br;
 	private ArrayList<String> lineArr;
@@ -21,6 +31,8 @@ public class CommonParserUtil {
 	private HashMap<String, TokenBuilder> tokenBuilders;
 
 	// Parser part
+	private String startSymbol;
+	
 	private ArrayList<String> action_table;
 	private ArrayList<String> goto_table;
 	private HashMap<Integer, String> grammar_rules;
@@ -34,6 +46,27 @@ public class CommonParserUtil {
 	public CommonParserUtil() throws IOException {
 		super();
 		this.lexer = new ArrayList<Terminal>();
+
+		stack = new Stack<>();
+
+		action_table = new ArrayList<>();
+		goto_table = new ArrayList<>();
+		grammar_rules = new HashMap<>();
+
+		treeBuilders = new HashMap<>();
+		tokenBuilders = new HashMap<>();
+
+		readInitialize();
+	}
+
+	public CommonParserUtil(String fGrammarRules, String fActionTable, String fGotoTable) throws IOException {
+		super();
+
+		this.fGrammarRules = fGrammarRules;
+		this.fActionTable = fActionTable;
+		this.fGotoTable = fGotoTable;
+
+		lexer = new ArrayList<Terminal>();
 
 		stack = new Stack<>();
 
@@ -83,6 +116,10 @@ public class CommonParserUtil {
 
 		return nt.getSyntax();
 	}
+	
+	public void ruleStartSymbol(String startSymbol) {
+		this.startSymbol = startSymbol;
+	}
 
 	public void rule(String productionRule, TreeBuilder tb) {
 		treeBuilders.put(productionRule, tb);
@@ -119,43 +156,43 @@ public class CommonParserUtil {
 		lineno = 1;
 		TokenBuilder tb;
 
+		Object[] keys = tokenBuilders.keySet().toArray();
+
 		for (int idx = 0; idx < lineArr.size(); idx++) {
 			String line = lineArr.get(idx);
 			String str = "";
-			int strIdx = 0;
-			boolean flag = false;
 
 			// pattern matching
-			char ch = line.charAt(strIdx);
-			int front_idx = strIdx + 1;
-			Object[] keys = tokenBuilders.keySet().toArray();
+			int front_idx = 0;
+			
+			while (front_idx < line.length()) {
+				int i;
+				for (i = 0; i < keys.length; i++) {
+					String regExp = (String) keys[i];
+					Pattern p = Pattern.compile(regExp);
+					Matcher matcher = p.matcher(line).region(front_idx, line.length());
 
-			for (int i = 0; i < keys.length; i++) {
-				String regExp = (String) keys[i];
-				String matchStr = Character.toString(ch);
-				if (strIdx + 1 < line.length() && (matchStr + line.charAt(strIdx + 1)).matches(regExp)) {
-					matchStr = matchStr + line.charAt(strIdx + 1);
-					strIdx = strIdx + 1;
-				}
-				while (matchStr.matches(regExp) && (line != null && strIdx < line.length())) {
-					flag = true;
-					strIdx = strIdx + 1;
-					if (strIdx < line.length()) {
-						ch = line.charAt(strIdx);
-						str = matchStr;
-						matchStr = matchStr + ch;
+					if (matcher.lookingAt()) {
+						int startIdx = matcher.start();
+						int endIdx = matcher.end();
+						System.out.println(startIdx +", " + endIdx);
+						
+						str = line.substring(startIdx, endIdx);
+						matcher.region(endIdx, line.length());
+
+						tb = tokenBuilders.get(regExp);
+						if (tb.tokenBuilder(str) != null) {
+							lexer.add(new Terminal(str, tb.tokenBuilder(str), startIdx, lineno));
+						}
+						
+						str = "";
+
+						front_idx = endIdx;
+						break;
 					}
 				}
-
-				if (flag) {
-					tb = tokenBuilders.get(regExp);
-					if (tb.tokenBuilder(str) != null) {
-						lexer.add(new Terminal(str, tb.tokenBuilder(str), front_idx, lineno));
-					}
-					flag = false;
-					str = "";
-					i = -1;
-				}
+				if (i >= keys.length)
+					throw new LexerException("No Pattern matching " + front_idx + ", " + line.substring(front_idx));
 			}
 
 			lineno++;
@@ -241,6 +278,10 @@ public class CommonParserUtil {
 		FileReader grammarFReader = new FileReader("grammar_rules.txt");
 		FileReader actionFReader = new FileReader("action_table.txt");
 		FileReader gotoFReader = new FileReader("goto_table.txt");
+
+		// FileReader grammarFReader = new FileReader(fGrammarRules);
+		// FileReader actionFReader = new FileReader(fActionTable);
+		// FileReader gotoFReader = new FileReader(fGotoTable);
 
 		BufferedReader grammarBReader = new BufferedReader(grammarFReader);
 		BufferedReader actionBReader = new BufferedReader(actionFReader);

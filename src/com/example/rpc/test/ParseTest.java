@@ -8,13 +8,13 @@ import java.io.StringReader;
 
 import org.junit.Test;
 
+import com.example.lib.LexerException;
+import com.example.lib.ParserException;
 import com.example.rpc.App;
 import com.example.rpc.Lam;
 import com.example.rpc.Location;
 import com.example.rpc.Parser;
 import com.example.rpc.Term;
-import com.rpc.parser.LexerException;
-import com.rpc.parser.ParserException;
 
 public class ParseTest {
 
@@ -52,9 +52,9 @@ public class ParseTest {
 	}
 
 	@Test
-	public void test() throws IOException, LexerException, ParserException {
+	public void test4() throws IOException, LexerException, ParserException {
 		String[] files = { "MultiParen01.txt", "ServerClient01.txt", "ServerClient02.txt", "VariableName01.txt",
-				"WhiteSpace01.txt" };
+				"VariableName02.txt", "WhiteSpace01.txt" };
 
 		for (int i = 0; i < files.length; i++) {
 			String directory = System.getProperty("user.dir");

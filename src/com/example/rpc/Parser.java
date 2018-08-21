@@ -3,19 +3,19 @@ package com.example.rpc;
 import java.io.IOException;
 import java.io.Reader;
 
-import com.rpc.parser.CommonParserUtil;
-import com.rpc.parser.LexerException;
-import com.rpc.parser.ParserException;
-import com.rpc.parser.Token;
+import com.example.lib.CommonParserUtil;
+import com.example.lib.LexerException;
+import com.example.lib.ParserException;
 
 public class Parser {
 	private CommonParserUtil pu;
 	
 	public Parser() throws IOException, LexerException {
-		pu = new CommonParserUtil();
+//		pu = new CommonParserUtil();
+		pu = new CommonParserUtil("grammar_rules.txt", "action_table.txt", "goto_table.txt");
 
 		pu.lex("[ \t\n]", text -> { return null; });
-		pu.lex("[0-9]*", text -> { return Token.NUM; });
+		pu.lex("[0-9]+", text -> { return Token.NUM; });
 		pu.lex("[a-zA-Z]+[0-9]*", text -> {
 			if (text.equalsIgnoreCase("lam"))
 					return Token.LAM;
@@ -25,8 +25,9 @@ public class Parser {
 		pu.lex("\\(", text -> { return Token.OPENPAREN; });
 		pu.lex("\\)", text -> { return Token.CLOSEPAREN; });
 		pu.lex("\\.", text -> { return Token.DOT; });
-		pu.lexEndToken("$", text -> { return Token.END_OF_TOKEN; });
+		pu.lexEndToken("\\$", text -> { return Token.END_OF_TOKEN; });
 		
+		pu.ruleStartSymbol("L'");
 		pu.rule("L' -> L", () -> { return pu.get(1); });
 		pu.rule("L -> E", () -> { return pu.get(1); });
 		pu.rule("L -> lam loc id . L", () -> {

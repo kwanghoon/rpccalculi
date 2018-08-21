@@ -1,4 +1,4 @@
-package com.rpc.parser;
+package com.example.lib;
 
 public class ParserException extends Exception {
 	private String message;

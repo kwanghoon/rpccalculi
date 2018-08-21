@@ -1,4 +1,6 @@
-package com.rpc.parser;
+package com.example.rpc;
+
+import com.example.lib.ParserException;
 
 public enum Token {
 	END_OF_TOKEN("$"),

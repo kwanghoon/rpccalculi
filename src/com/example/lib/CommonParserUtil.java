@@ -142,6 +142,8 @@ public class CommonParserUtil {
 						int startIdx = matcher.start();
 						int endIdx = matcher.end();
 
+//						System.out.println(startIdx +", " + endIdx);
+						
 						str = line.substring(startIdx, endIdx);
 						matcher.region(endIdx, line.length());
 

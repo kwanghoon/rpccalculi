@@ -7,7 +7,7 @@ import javafx.util.Pair;
 public class TypedCSSta {
 	public static ClosedFun lookup(FunStore fs, String f) {
 		for (Pair<String, ClosedFun> p: fs.getFs()) {
-			if (p.getKey() == f)
+			if (p.getKey().equals(f))
 				return p.getValue();
 		}
 		return null;

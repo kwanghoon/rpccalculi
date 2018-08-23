@@ -24,7 +24,7 @@ public class CommonParserUtil {
 	// Lexer part
 	private int lineno;
 	private String endOfTok;
-	private TokenBuilder endOfTokenBuilder;
+	private Object objEndOfTok;
 
 	private BufferedReader br;
 	private ArrayList<String> lineArr;
@@ -95,8 +95,9 @@ public class CommonParserUtil {
 		tokenBuilders.put(regExp, tb);
 	}
 
-	public void lexEndToken(String regExp, TokenBuilder tb) {
+	public void lexEndToken(String regExp, Object objEndOfTok) {
 		endOfTok = regExp;
+		this.objEndOfTok = objEndOfTok;
 	}
 
 	public void Lexing(Reader r) throws IOException, LexerException {
@@ -162,8 +163,7 @@ public class CommonParserUtil {
 			lineno++;
 		}
 
-		tb = tokenBuilders.get(endOfTok);
-		Terminal epsilon = new Terminal(endOfTok, tb.tokenBuilder(endOfTok), -1, -1);
+		Terminal epsilon = new Terminal(endOfTok, objEndOfTok, -1, -1);
 		lexer.add(epsilon);
 	}
 

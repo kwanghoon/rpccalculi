@@ -2,6 +2,9 @@ package com.example.stacs;
 
 import java.util.ArrayList;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 public class Clo extends StaValue {
 	private String f;
 	private ArrayList<StaValue> vs;
@@ -34,6 +37,8 @@ public class Clo extends StaValue {
 		int cnt = 0;
 		
 		for (StaValue v : vs) {
+			if (v == null) 
+				System.err.println("Clo " + f + " has something null inside");
 			ret += v.toString();
 			
 			if (cnt != vs.size() - 1) {
@@ -44,6 +49,28 @@ public class Clo extends StaValue {
 		ret += ")";
 		
 		return ret;
+	}
+	
+	public static final String Clo = "Clo";
+	public static final String Fvs = "Fvs";
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject toJson() {
+		JSONObject jsonObject = new JSONObject();
+		
+		// Function name
+		jsonObject.put(Clo, f);
+		
+		// Free variables
+		JSONArray jsonArray = new JSONArray();
+		for(StaValue sv : vs) {
+			jsonArray.add(sv.toJson());
+		}
+		
+		jsonObject.put(Fvs, jsonArray);
+	
+		return jsonObject;
 	}
 	
 }

@@ -175,7 +175,7 @@ public class CommonParserUtil {
 					if (matcher.lookingAt()) {
 						int startIdx = matcher.start();
 						int endIdx = matcher.end();
-						System.out.println(startIdx +", " + endIdx);
+//						System.out.println(startIdx +", " + endIdx);
 						
 						str = line.substring(startIdx, endIdx);
 						matcher.region(endIdx, line.length());

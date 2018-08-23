@@ -11,8 +11,8 @@ public class Parser {
 	private CommonParserUtil pu;
 	
 	public Parser() throws IOException, LexerException {
-//		pu = new CommonParserUtil();
-		pu = new CommonParserUtil("grammar_rules.txt", "action_table.txt", "goto_table.txt");
+		pu = new CommonParserUtil();
+//		pu = new CommonParserUtil("grammar_rules.txt", "action_table.txt", "goto_table.txt");
 
 		pu.lex("[ \t\n]", text -> { return null; });
 		pu.lex("[0-9]+", text -> { return Token.NUM; });
@@ -25,7 +25,7 @@ public class Parser {
 		pu.lex("\\(", text -> { return Token.OPENPAREN; });
 		pu.lex("\\)", text -> { return Token.CLOSEPAREN; });
 		pu.lex("\\.", text -> { return Token.DOT; });
-		pu.lexEndToken("\\$", text -> { return Token.END_OF_TOKEN; });
+		pu.lexEndToken("$", Token.END_OF_TOKEN);
 		
 		pu.ruleStartSymbol("L'");
 		pu.rule("L' -> L", () -> { return pu.get(1); });

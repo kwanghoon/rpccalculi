@@ -6,9 +6,9 @@ import javafx.util.Pair;
 
 public class TypedCSEnc {
 	public static ClosedFun lookup(FunStore fs, String f) {
-		for (Pair<String, ClosedFun> p: fs.getFs()) {
-			if (p.getKey().equals(f))
-				return p.getValue();
+		for (String p: fs.getFs().keySet()) {
+			if (p.equals(f))
+				return fs.getFs().get(p);
 		}
 		return null;
 	}

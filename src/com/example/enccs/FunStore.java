@@ -1,36 +1,34 @@
 package com.example.enccs;
 
-import java.util.ArrayList;
-
-import javafx.util.Pair;
+import java.util.HashMap;
 
 public class FunStore {
-	private ArrayList<Pair<String, ClosedFun>> fs;
+	private HashMap<String, ClosedFun> fs;
 
 	public FunStore() {
 		super();
-		fs = new ArrayList<>();
+		fs = new HashMap<>();
 	}
 	
-	public FunStore(ArrayList<Pair<String, ClosedFun>> fs) {
+	public FunStore(HashMap<String, ClosedFun> fs) {
 		super();
 		this.fs = fs;
 	}
 
-	public ArrayList<Pair<String, ClosedFun>> getFs() {
+	public HashMap<String, ClosedFun> getFs() {
 		return fs;
 	}
 
-	public void setFs(ArrayList<Pair<String, ClosedFun>> fs) {
+	public void setFs(HashMap<String, ClosedFun> fs) {
 		this.fs = fs;
 	}
 
 	@Override
 	public String toString() {
 		String ret = "";
-		for (Pair<String, ClosedFun> p: fs) {
-			ret += p.getKey() + " = ";
-			ret += p.getValue() + "\n";
+		for (String p: fs.keySet()) {
+			ret += p + " = ";
+			ret += fs.get(p) + "\n";
 		}
 		
 		return ret;

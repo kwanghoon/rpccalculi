@@ -50,10 +50,10 @@ public class CompCSStaTerm {
 			FunStore serverFS = p1.getValue().getThird();
 			
 			if (rtLam.getLoc() == Location.Client) {
-				clientFS.getFs().add(new Pair<>(f, closedFun));
+				clientFS.getFs().put(f, closedFun);
 			}
 			else {
-				serverFS.getFs().add(new Pair<>(f, closedFun));
+				serverFS.getFs().put(f, closedFun);
 			}
 			
 			ArrayList<StaValue> cloVs = new ArrayList<>();
@@ -74,10 +74,10 @@ public class CompCSStaTerm {
 			Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), rtApp.getWs(), zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
-			clientFS.getFs().addAll(p2.getValue().getSecond().getFs());
+			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
 			
 			FunStore serverFS = p1.getValue().getThird();
-			serverFS.getFs().addAll(p2.getValue().getThird().getFs());
+			serverFS.getFs().putAll(p2.getValue().getThird().getFs());
 			
 			triple = new TripleTup<>(new App((StaValue) p1.getValue().getFirst(), p2.getValue().getFirst()), clientFS, serverFS);
 			pair = new Pair<>(p2.getKey(), triple);
@@ -94,10 +94,10 @@ public class CompCSStaTerm {
 			Pair<Integer, TripleTup<StaTerm, FunStore, FunStore>> p2 = comp(p1.getKey(), rtLet.getM2(), strArr);
 			
 			FunStore clientFS = p1.getValue().getSecond();
-			clientFS.getFs().addAll(p2.getValue().getSecond().getFs());
+			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
 			
 			FunStore serverFS = p1.getValue().getThird();
-			serverFS.getFs().addAll(p2.getValue().getThird().getFs());
+			serverFS.getFs().putAll(p2.getValue().getThird().getFs());
 			
 			triple = new TripleTup<>(new Let(rtLet.getY(), p1.getValue().getFirst(), p2.getValue().getFirst()), clientFS, serverFS);
 			pair = new Pair<>(p2.getKey(), triple);
@@ -111,10 +111,10 @@ public class CompCSStaTerm {
 			Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), rtReq.getWs(), zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
-			clientFS.getFs().addAll(p2.getValue().getSecond().getFs());
+			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
 			
 			FunStore serverFS = p1.getValue().getThird();
-			serverFS.getFs().addAll(p2.getValue().getThird().getFs());
+			serverFS.getFs().putAll(p2.getValue().getThird().getFs());
 			
 			triple = new TripleTup<>(new Req((StaValue) p1.getValue().getFirst(), p2.getValue().getFirst()), clientFS, serverFS);
 			pair = new Pair<>(p2.getKey(), triple);
@@ -128,10 +128,10 @@ public class CompCSStaTerm {
 			Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), rtCall.getWs(), zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
-			clientFS.getFs().addAll(p2.getValue().getSecond().getFs());
+			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
 			
 			FunStore serverFS = p1.getValue().getThird();
-			serverFS.getFs().addAll(p2.getValue().getThird().getFs());
+			serverFS.getFs().putAll(p2.getValue().getThird().getFs());
 			
 			triple = new TripleTup<>(new Call((StaValue) p1.getValue().getFirst(), p2.getValue().getFirst()), clientFS, serverFS);
 			pair = new Pair<>(p2.getKey(), triple);
@@ -174,10 +174,10 @@ public class CompCSStaTerm {
 			svArr.addAll(p1.getValue().getFirst());
 			
 			FunStore clientFS = p2.getValue().getSecond();
-			clientFS.getFs().addAll(p1.getValue().getSecond().getFs());
+			clientFS.getFs().putAll(p1.getValue().getSecond().getFs());
 			
 			FunStore serverFS = p2.getValue().getThird();
-			serverFS.getFs().addAll(p1.getValue().getThird().getFs());
+			serverFS.getFs().putAll(p1.getValue().getThird().getFs());
 			
 			triple = new TripleTup<>(svArr, clientFS, serverFS);
 			pair = new Pair<>(p2.getKey(), triple);

@@ -48,10 +48,10 @@ public class CompCSEncTerm {
 			FunStore serverFS = p1.getValue().getThird();
 			
 			if (ttLam.getLoc() == Location.Client) {
-				clientFS.getFs().add(new Pair<>(f, closedFun));
+				clientFS.getFs().put(f, closedFun);
 			}
 			else {
-				serverFS.getFs().add(new Pair<>(f, closedFun));
+				serverFS.getFs().put(f, closedFun);
 			}
 			
 			ArrayList<EncValue> cloVs = new ArrayList<>();
@@ -72,10 +72,10 @@ public class CompCSEncTerm {
 			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), ttApp.getArgs(), zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
-			clientFS.getFs().addAll(p2.getValue().getSecond().getFs());
+			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
 			
 			FunStore serverFS = p1.getValue().getThird();
-			serverFS.getFs().addAll(p2.getValue().getThird().getFs());
+			serverFS.getFs().putAll(p2.getValue().getThird().getFs());
 			
 			triple = new TripleTup<>(new App((EncValue) p1.getValue().getFirst(), p2.getValue().getFirst()), clientFS, serverFS);
 			pair = new Pair<>(p2.getKey(), triple);
@@ -92,10 +92,10 @@ public class CompCSEncTerm {
 			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p2 = comp(p1.getKey(), ttLet.getM2(), strArr);
 			
 			FunStore clientFS = p1.getValue().getSecond();
-			clientFS.getFs().addAll(p2.getValue().getSecond().getFs());
+			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
 			
 			FunStore serverFS = p1.getValue().getThird();
-			serverFS.getFs().addAll(p2.getValue().getThird().getFs());
+			serverFS.getFs().putAll(p2.getValue().getThird().getFs());
 			
 			triple = new TripleTup<>(new Let(ttLet.getVal(), p1.getValue().getFirst(), p2.getValue().getFirst()), clientFS, serverFS);
 			pair = new Pair<>(p2.getKey(), triple);
@@ -109,10 +109,10 @@ public class CompCSEncTerm {
 			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), ttReq.getArgs(), zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
-			clientFS.getFs().addAll(p2.getValue().getSecond().getFs());
+			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
 			
 			FunStore serverFS = p1.getValue().getThird();
-			serverFS.getFs().addAll(p2.getValue().getThird().getFs());
+			serverFS.getFs().putAll(p2.getValue().getThird().getFs());
 			
 			triple = new TripleTup<>(new Req((EncValue) p1.getValue().getFirst(), p2.getValue().getFirst()), clientFS, serverFS);
 			pair = new Pair<>(p2.getKey(), triple);
@@ -126,10 +126,10 @@ public class CompCSEncTerm {
 			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), ttCall.getArgs(), zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
-			clientFS.getFs().addAll(p2.getValue().getSecond().getFs());
+			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
 			
 			FunStore serverFS = p1.getValue().getThird();
-			serverFS.getFs().addAll(p2.getValue().getThird().getFs());
+			serverFS.getFs().putAll(p2.getValue().getThird().getFs());
 			
 			triple = new TripleTup<>(new Call((EncValue) p1.getValue().getFirst(), p2.getValue().getFirst()), clientFS, serverFS);
 			pair = new Pair<>(p2.getKey(), triple);
@@ -161,10 +161,10 @@ public class CompCSEncTerm {
 			svArr.addAll(p1.getValue().getFirst());
 			
 			FunStore clientFS = p2.getValue().getSecond();
-			clientFS.getFs().addAll(p1.getValue().getSecond().getFs());
+			clientFS.getFs().putAll(p1.getValue().getSecond().getFs());
 			
 			FunStore serverFS = p2.getValue().getThird();
-			serverFS.getFs().addAll(p1.getValue().getThird().getFs());
+			serverFS.getFs().putAll(p1.getValue().getThird().getFs());
 			
 			triple = new TripleTup<>(svArr, clientFS, serverFS);
 			pair = new Pair<>(p2.getKey(), triple);

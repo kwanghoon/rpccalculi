@@ -2,7 +2,6 @@ package com.example.stacs;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -11,9 +10,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -25,8 +22,6 @@ import com.example.rpc.Term;
 import com.example.starpc.CompRPCStaTerm;
 import com.example.typedrpc.Infer;
 import com.example.utils.TripleTup;
-
-import javafx.util.Pair;
 
 public class TypedCSStaInThread {
 	// Protocol headers
@@ -517,9 +512,9 @@ public class TypedCSStaInThread {
 	}
 	
 	public static ClosedFun lookup(FunStore fs, String f) {
-		for (Pair<String, ClosedFun> p: fs.getFs()) {
-			if (p.getKey().equals(f))
-				return p.getValue();
+		for (String p: fs.getFs().keySet()) {
+			if (p.equals(f))
+				return fs.getFs().get(p);
 		}
 		System.err.println("lookup: Not found: " + f + " in \n" + fs);
 		return null;

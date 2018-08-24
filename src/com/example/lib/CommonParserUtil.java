@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -362,7 +363,11 @@ public class CommonParserUtil {
 								"\"" + grammarPath + "\" -output \"" + grammarRulesPath + "\" \"" + actionTablePath + "\" \"" + gotoTablePath + "\"");
 		try {
 			Process p = pb.start();
-			readInitialize();
+			
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			
+			if (reader.readLine().equals("Done"))
+				readInitialize();
 		}
 		catch (IOException e) {
 			e.printStackTrace();

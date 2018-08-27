@@ -29,7 +29,7 @@ public class Const extends StaValue {
 	@SuppressWarnings("unchecked")
 	public JSONObject toJson() {
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put(Const, new Integer(i));
+		jsonObject.put(Const, new Long(i));
 		return jsonObject;
 	}
 

@@ -8,7 +8,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.function.Function;
 
@@ -56,7 +55,7 @@ public class TypedCSHttp {
 			FunStore clientFS = csStaTerm.getSecond();
 			FunStore serverFS = csStaTerm.getThird();
 
-			String programName = fileName.substring(0, fileName.indexOf(".")) + new Random().nextInt(100);
+			String programName = fileName.substring(0, fileName.indexOf("."));
 
 			Thread serverThread = new Thread(() -> {
 				HttpServer server = new HttpServer(programName, serverFS);
@@ -85,6 +84,7 @@ public class TypedCSHttp {
 	public static class CSClient {
 		private FunStore clientFS;
 		private String programName;
+		private String serverAddr;
 
 		private Socket socket;
 		private BufferedReader reader;
@@ -102,6 +102,7 @@ public class TypedCSHttp {
 			jsonParser = new JSONParser();
 
 			try {
+				this.serverAddr = serverAddr;
 				socket = new Socket(serverAddr, 8080);
 				reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				writer = new PrintWriter(socket.getOutputStream(), true);
@@ -112,95 +113,115 @@ public class TypedCSHttp {
 			}
 		}
 
+		public void connectServer() {
+			if (socket == null) {
+				try {
+					socket = new Socket(serverAddr, 8080);
+
+					reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					writer = new PrintWriter(socket.getOutputStream(), true);
+				} catch (UnknownHostException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
 		public void writeHeader() {
+			connectServer();
 			writer.print("GET " + "/rpc/" + programName + " HTTP/1.1.\r\n");
 			writer.print("Host: " + socket.getInetAddress().getHostAddress() + "\r\n");
 			writer.print("\r\n");
 		}
 
 		public StaValue evalClient(StaTerm m) {
-			
+
 			Function<Let, StaTerm> receiver = mLet -> {
 				StaTerm retM;
 				try {
 					// HTTP_VERSION STATUS_CODE PHRASE
 					String statusLine = reader.readLine();
-					
+
 					// 잘 왔는지를 확인하기 위해서 필요!
 					int idxVersion = statusLine.indexOf(" ");
 					int idxPhrase = statusLine.indexOf(" ", idxVersion + 1);
-					
-					int statusCode = Integer.parseInt(statusLine.substring(idxVersion+1, idxPhrase));
-					
+
+					int statusCode = Integer.parseInt(statusLine.substring(idxVersion + 1, idxPhrase));
+
 					if (statusCode == 200) {
 						String line;
 						// entity body 이전인 \r\n에 도달할 때까지 읽기
-						while(!(line=reader.readLine()).equals(""));
+						while (!(line = reader.readLine()).equals(""))
+							;
 
-						String sessionState = reader.readLine();	// sessionState -> CLOSE_SESSION, sessionNum
-						line = reader.readLine();	// protocol
-						
+						String sessionState = reader.readLine(); // sessionState -> CLOSE_SESSION, sessionNum
+						line = reader.readLine(); // protocol
+
 						try {
 							if (sessionState.equals("CLOSE_SESSION")) {
 								sessionNum = null;
-							}
-							else {
+							} else {
 								sessionNum = Integer.parseInt(sessionState);
 							}
-							
+
 							if (line.equals("REPLY")) {
 								String strReply = reader.readLine();
 								JSONObject replyJson = (JSONObject) jsonParser.parse(strReply);
 								StaValue replyVal = JSonUtil.fromJson(replyJson);
-								
+
 								retM = new Let(mLet.getY(), replyVal, mLet.getM2());
-							}
-							else if (line.equals("CALL")) {
+							} else if (line.equals("CALL")) {
 								String strClo = reader.readLine();
 								JSONObject cloJson = (JSONObject) jsonParser.parse(strClo);
 								StaValue clo = JSonUtil.fromJson(cloJson);
-								
+
 								int n = Integer.parseInt(reader.readLine());
-								
+
 								ArrayList<StaValue> args = new ArrayList<>();
 								for (int i = 0; i < n; i++) {
 									String strArg = reader.readLine();
 									JSONObject argJson = (JSONObject) jsonParser.parse(strArg);
 									StaValue arg = JSonUtil.fromJson(argJson);
-									
+
 									args.add(arg);
 								}
-								
+
 								retM = new Let(mLet.getY(), new App(clo, args), mLet.getM2());
-							}
-							else {
+							} else {
 								System.err.println("receiver: Unexpected protocol(" + line + ")");
 								retM = null;
 							}
-						} catch(NumberFormatException e) {
+						} catch (NumberFormatException e) {
 							e.printStackTrace();
 							retM = null;
-						} catch(ParseException e) {
+						} catch (ParseException e) {
 							e.printStackTrace();
 							retM = null;
 						}
-					}
-					else {
+					} else {
 						System.err.println(statusCode);
 						retM = null;
 					}
-					
+
 				} catch (IOException e) {
 					e.printStackTrace();
 					retM = null;
 				}
-				
+
+				try {
+					socket.close();
+					socket = null;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
 				return retM;
 			};
-			
+
 			while (true) {
 				System.out.println("CLIENT: " + m);
-				
+
 				if (m instanceof Let) {
 					Let mLet = (Let) m;
 					StaTerm m1 = mLet.getM1();
@@ -222,7 +243,7 @@ public class TypedCSHttp {
 						if (mReq1.getF() instanceof Clo) {
 							Clo fClo = (Clo) mReq1.getF();
 							ArrayList<StaValue> ws = mReq1.getWs();
-							
+
 							writeHeader();
 							if (sessionNum != null)
 								writer.println(sessionNum);
@@ -231,10 +252,10 @@ public class TypedCSHttp {
 							writer.println("REQ");
 							writer.println(fClo.toJson());
 							writer.println(ws.size());
-							for (StaValue w: ws) {
+							for (StaValue w : ws) {
 								writer.println(w.toJson());
 							}
-							
+
 							m = receiver.apply(mLet);
 						}
 					} else if (m1 instanceof Clo) {
@@ -255,12 +276,12 @@ public class TypedCSHttp {
 					} else if (m1 instanceof Ret) {
 						Ret mRet1 = (Ret) m1;
 						StaValue retVal = mRet1.getW();
-						
+
 						writeHeader();
-						writer.println(sessionNum);	// RET의 경우 sessionNum가 null인 상태는 있을 수가 없음
+						writer.println(sessionNum); // RET의 경우 sessionNum가 null인 상태는 있을 수가 없음
 						writer.println("RET");
 						writer.println(retVal.toJson());
-						
+
 						m = receiver.apply(mLet);
 					}
 				} else if (m instanceof Clo || m instanceof Const) {

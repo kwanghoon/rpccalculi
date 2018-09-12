@@ -20,10 +20,12 @@ import org.json.simple.parser.ParseException;
 
 public class HttpServer {
 	private static HashMap<String, FunStore> programFSMap = new HashMap<>();
-	private static HashMap<Integer, Thread> sessionMap = new HashMap<>();
+	private static HashMap<Integer, CSServer> sessionMap = new HashMap<>();
 	private static int count = 0;
 
 	public String protocol;
+
+	public ServerSocket s = null;
 
 	public HttpServer(String programName, FunStore phi) {
 		if (!programFSMap.keySet().contains(programName)) {
@@ -32,7 +34,6 @@ public class HttpServer {
 	}
 
 	public void start() {
-		ServerSocket s = null;
 		try {
 			s = new ServerSocket(8080, 10, InetAddress.getByName("127.0.0.1"));
 
@@ -44,7 +45,6 @@ public class HttpServer {
 				// GET /rpc/programName HTTP/1.1\r\n
 				BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 				String request = reader.readLine();
-
 				// method와 version 사이에 있는 url을 추출하기 위해 필요
 				int idxMethod = request.indexOf(" ");
 				int idxVersion = request.indexOf(" ", idxMethod + 1);
@@ -61,7 +61,7 @@ public class HttpServer {
 
 					String sessionState = reader.readLine(); // sessionState -> OPEN_SESSION, sessionNum
 					protocol = reader.readLine(); // protocol -> REQ, RET
-					Thread th;
+					CSServer server;
 
 					int session;
 					boolean isOpen = false;
@@ -73,22 +73,30 @@ public class HttpServer {
 
 							FunStore phi = programFSMap.get(urlProgramName);
 //							CSServer server = new CSServer(phi, session, conn);
-							th = new CSServer(phi, session, conn);
+							server = new CSServer(phi, session, conn);
 
-							sessionMap.put(count, th);
+							sessionMap.put(count, server);
 							isOpen = true;
 						} else {
 							Integer sessionNum = Integer.parseInt(sessionState);
 							session = sessionNum;
 
-							th = sessionMap.get(sessionNum);
+							server = sessionMap.get(sessionNum);
 							isOpen = false;
 						}
 
+						Thread th;
+
 						if (isOpen) {
+							th = new Thread(() -> {
+								server.start();
+							});
 							th.start();
 						} else {
-							th.notify();
+							synchronized (server) {
+								server.connectClient(conn);
+								server.notify();
+							}
 						}
 
 					} catch (NumberFormatException e) {
@@ -96,7 +104,6 @@ public class HttpServer {
 					}
 				} else {
 					// program에 대한 funstore가 등록되지 않은 경우
-					// 에러 출력 필요
 					System.err.println("program funstore not found");
 				}
 			}
@@ -126,10 +133,16 @@ public class HttpServer {
 
 		private int callCnt;
 		private int replyCnt;
+		
+		boolean isNew;
+
+		public String strWait = "";
 
 		CSServer(FunStore phi, Integer sessionNum, Socket conn) throws IOException {
 			this.phi = phi;
 			this.sessionNum = sessionNum;
+			
+			isNew = false;
 
 			jsonParser = new JSONParser();
 
@@ -144,6 +157,18 @@ public class HttpServer {
 		@Override
 		public void run() {
 			handleClient();
+		}
+
+		public void connectClient(Socket socket) {
+			try {
+				isNew = true;
+				conn = socket;
+
+				reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+				writer = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		private void handleClient() {
@@ -239,56 +264,65 @@ public class HttpServer {
 								}
 								writer.flush();
 								// Client로 Call을 날리는 부분
-								// this.yield();
-								Thread.yield();
+								synchronized (this) {
+									this.wait();
+									System.out.println("after notify(): " + isNew);
+									// object wait 시키기
 
-								while (true) {
-									String line;
-									while (!(line = reader.readLine()).equals(""));
-									String session = reader.readLine();
-									line = reader.readLine();
-
-									if (line.equals("RET")) {
-										callCnt = callCnt - 1;
-
-										String retValInStr = reader.readLine();
-										JSONObject retValInJson = (JSONObject) jsonParser.parse(retValInStr);
-										StaValue retVal = JSonUtil.fromJson(retValInJson);
-
-										m = new Let(mLet.getY(), retVal, mLet.getM2());
-
-										break;
-									} else if (line.equals("REQ")) {
-										replyCnt = replyCnt + 1;
-
-										String cloFnInStr = reader.readLine();
-										System.out.println(cloFnInStr);
-										JSONObject cloFnInJson = (JSONObject) jsonParser.parse(cloFnInStr);
-										StaValue cloFn = JSonUtil.fromJson(cloFnInJson);
-
-										String numOfArgsInStr = reader.readLine();
-										int numOfArgs = Integer.parseInt(numOfArgsInStr);
-										ArrayList<StaValue> cloFnArgs = new ArrayList<>();
-
-										for (int i = 0; i < numOfArgs; i++) {
-											String argInStr = reader.readLine();
-											JSONObject argInJson = (JSONObject) jsonParser.parse(argInStr);
-											StaValue arg = JSonUtil.fromJson(argInJson);
-
-											cloFnArgs.add(arg);
+									while (true) {
+										System.out.println(reader.ready());
+										String line;
+										while (!(line = reader.readLine()).equals("")) {
+											System.out.println(line);
 										}
+										String session = reader.readLine();
+										line = reader.readLine();
+										System.out.println(session + ", " + line);
 
-										String rStr = "r";
-										Var rVar = new Var(rStr);
+										if (line.equals("RET")) {
+											callCnt = callCnt - 1;
 
-										StaTerm reqTerm = new Let(rStr, new App(cloFn, args), rVar);
+											String retValInStr = reader.readLine();
+											JSONObject retValInJson = (JSONObject) jsonParser.parse(retValInStr);
+											StaValue retVal = JSonUtil.fromJson(retValInJson);
 
-										evalServer(reqTerm);
-									} else {
-										System.err.println("evalServer(Call) Must not reach here. " + line);
+											m = new Let(mLet.getY(), retVal, mLet.getM2());
+
+											break;
+										} else if (line.equals("REQ")) {
+											replyCnt = replyCnt + 1;
+
+											String cloFnInStr = reader.readLine();
+											JSONObject cloFnInJson = (JSONObject) jsonParser.parse(cloFnInStr);
+											StaValue cloFn = JSonUtil.fromJson(cloFnInJson);
+
+											String numOfArgsInStr = reader.readLine();
+											int numOfArgs = Integer.parseInt(numOfArgsInStr);
+											ArrayList<StaValue> cloFnArgs = new ArrayList<>();
+
+											for (int i = 0; i < numOfArgs; i++) {
+												String argInStr = reader.readLine();
+												JSONObject argInJson = (JSONObject) jsonParser.parse(argInStr);
+												StaValue arg = JSonUtil.fromJson(argInJson);
+
+												cloFnArgs.add(arg);
+											}
+
+											String rStr = "r";
+											Var rVar = new Var(rStr);
+
+											StaTerm reqTerm = new Let(rStr, new App(cloFn, args), rVar);
+
+											evalServer(reqTerm);
+										} else {
+											System.err.println("evalServer(Call) Must not reach here. " + line);
+										}
 									}
 								}
 							} catch (IOException e) {
+								e.printStackTrace();
+								writeHeader(500, "Internal Server Error");
+							} catch (InterruptedException e) {
 								e.printStackTrace();
 								writeHeader(500, "Internal Server Error");
 							}

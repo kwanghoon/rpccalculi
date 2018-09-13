@@ -71,17 +71,30 @@ public class TypedCSHttp {
 			serverThread.start();
 			clientThread.start();
 
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
-		} catch (LexerException e) {
+		}
+		catch (LexerException e) {
 			e.printStackTrace();
-		} catch (ParserException e) {
+		}
+		catch (ParserException e) {
 			e.printStackTrace();
 		}
 
 	}
 
 	public static class CSClient {
+		private static final String OPEN_SESSION = "OPEN_SESSION";
+		private static final String CLOSE_SESSION = "CLOSE_SESSION";
+		
+		private static final String REQ = "REQ";
+		private static final String RET = "RET";
+		private static final String REPLY = "REPLY";
+		private static final String CALL = "CALL";
+		
+		private static final int PORT = 8080;
+		
 		private FunStore clientFS;
 		private String programName;
 		private String serverAddr;
@@ -101,28 +114,21 @@ public class TypedCSHttp {
 
 			jsonParser = new JSONParser();
 
-			try {
-				this.serverAddr = serverAddr;
-				socket = new Socket(serverAddr, 8080);
-				reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				writer = new PrintWriter(socket.getOutputStream(), true);
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			this.serverAddr = serverAddr;
 		}
 
-		public void connectServer() {
-			if (socket == null) {
+		private void connectServer() {
+			if (socket == null || !socket.isConnected()) {
 				try {
-					socket = new Socket(serverAddr, 8080);
+					socket = new Socket(serverAddr, PORT);
 
 					reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					writer = new PrintWriter(socket.getOutputStream(), true);
-				} catch (UnknownHostException e) {
+				}
+				catch (UnknownHostException e) {
 					e.printStackTrace();
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -156,22 +162,24 @@ public class TypedCSHttp {
 							;
 
 						String sessionState = reader.readLine(); // sessionState -> CLOSE_SESSION, sessionNum
-						line = reader.readLine(); // protocol
+						String protocol = reader.readLine(); // protocol
 
 						try {
-							if (sessionState.equals("CLOSE_SESSION")) {
+							if (sessionState.equals(CLOSE_SESSION)) {
 								sessionNum = null;
-							} else {
+							}
+							else {
 								sessionNum = Integer.parseInt(sessionState);
 							}
 
-							if (line.equals("REPLY")) {
+							if (protocol.equals(REPLY)) {
 								String strReply = reader.readLine();
 								JSONObject replyJson = (JSONObject) jsonParser.parse(strReply);
 								StaValue replyVal = JSonUtil.fromJson(replyJson);
 
 								retM = new Let(mLet.getY(), replyVal, mLet.getM2());
-							} else if (line.equals("CALL")) {
+							}
+							else if (protocol.equals(CALL)) {
 								String strClo = reader.readLine();
 								JSONObject cloJson = (JSONObject) jsonParser.parse(strClo);
 								StaValue clo = JSonUtil.fromJson(cloJson);
@@ -188,31 +196,36 @@ public class TypedCSHttp {
 								}
 
 								retM = new Let(mLet.getY(), new App(clo, args), mLet.getM2());
-							} else {
-								System.err.println("receiver: Unexpected protocol(" + line + ")");
+							}
+							else {
+								System.err.println("receiver: Unexpected protocol(" + protocol + ")");
 								retM = null;
 							}
-						} catch (NumberFormatException e) {
-							e.printStackTrace();
-							retM = null;
-						} catch (ParseException e) {
+						}
+						catch (NumberFormatException e) {
 							e.printStackTrace();
 							retM = null;
 						}
-					} else {
+						catch (ParseException e) {
+							e.printStackTrace();
+							retM = null;
+						}
+					}
+					else {
 						System.err.println(statusCode);
 						retM = null;
 					}
 
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 					retM = null;
 				}
 
 				try {
 					socket.close();
-					socket = null;
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 
@@ -237,7 +250,8 @@ public class TypedCSHttp {
 							m = CSStaMain.substs(CSStaMain.substs(closedFun.getM(), closedFun.getZs(), fClo.getVs()),
 									closedFun.getXs(), mApp1.getWs());
 						}
-					} else if (m1 instanceof Req) {
+					}
+					else if (m1 instanceof Req) {
 						Req mReq1 = (Req) m1;
 
 						if (mReq1.getF() instanceof Clo) {
@@ -248,8 +262,8 @@ public class TypedCSHttp {
 							if (sessionNum != null)
 								writer.println(sessionNum);
 							else
-								writer.println("OPEN_SESSION");
-							writer.println("REQ");
+								writer.println(OPEN_SESSION);
+							writer.println(REQ);
 							writer.println(fClo.toJson());
 							writer.println(ws.size());
 							for (StaValue w : ws) {
@@ -258,35 +272,41 @@ public class TypedCSHttp {
 
 							m = receiver.apply(mLet);
 						}
-					} else if (m1 instanceof Clo) {
+					}
+					else if (m1 instanceof Clo) {
 						Clo mClo1 = (Clo) m1;
 
 						m = CSStaMain.subst(mLet.getM2(), mLet.getY(), mClo1);
-					} else if (m1 instanceof Const) {
+					}
+					else if (m1 instanceof Const) {
 						Const mConst1 = (Const) m1;
 
 						m = CSStaMain.subst(mLet.getM2(), mLet.getY(), mConst1);
-					} else if (m1 instanceof Let) {
+					}
+					else if (m1 instanceof Let) {
 						Let mLet1 = (Let) m1;
 
 						Let let = new Let(mLet1.getY(), mLet1.getM1(),
 								new Let(mLet.getY(), mLet1.getM2(), mLet.getM2()));
 
 						m = let;
-					} else if (m1 instanceof Ret) {
+					}
+					else if (m1 instanceof Ret) {
 						Ret mRet1 = (Ret) m1;
 						StaValue retVal = mRet1.getW();
 
 						writeHeader();
 						writer.println(sessionNum); // RET의 경우 sessionNum가 null인 상태는 있을 수가 없음
-						writer.println("RET");
+						writer.println(RET);
 						writer.println(retVal.toJson());
 
 						m = receiver.apply(mLet);
 					}
-				} else if (m instanceof Clo || m instanceof Const) {
+				}
+				else if (m instanceof Clo || m instanceof Const) {
 					return (StaValue) m;
-				} else {
+				}
+				else {
 					System.err.println("TypedCSHttp.evalClient: Must not reach here");
 				}
 			}

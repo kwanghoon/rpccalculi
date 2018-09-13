@@ -450,9 +450,9 @@ public class TypedCSStaInThread {
 							
 							ClosedFun closedFun = lookup(clientFS, fClo.getF());
 							
-							m = CSStaMain.substs(
+							m = new Let(mLet.getY(), CSStaMain.substs(
 									CSStaMain.substs(closedFun.getM(), closedFun.getZs(), fClo.getVs()),
-									closedFun.getXs(), mApp1.getWs());
+									closedFun.getXs(), mApp1.getWs()), mLet.getM2());
 						}
 					}
 					else if (m1 instanceof Req) {

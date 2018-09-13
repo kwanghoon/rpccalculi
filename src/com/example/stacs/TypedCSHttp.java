@@ -28,58 +28,63 @@ public class TypedCSHttp {
 	public static void main(String[] args) {
 		Parser parser;
 		String serverAddr = "127.0.0.1";
+		HttpServer was = new HttpServer();
+		
+		Thread wasThread = new Thread(() -> {
+			was.start();
+		});
 
-		try {
-			parser = new Parser();
-			System.out.print("Enter a file name: ");
-			String fileName = new Scanner(System.in).next();
+		wasThread.start();
+		
+		while (true) {
+			try {
+				parser = new Parser();
+				System.out.print("Enter a file name: ");
+				String fileName = new Scanner(System.in).next();
 
-			FileReader fileReader = new FileReader("./testcase/" + fileName);
-			Scanner scan = new Scanner(fileReader);
+				FileReader fileReader = new FileReader("./testcase/" + fileName);
+				Scanner scan = new Scanner(fileReader);
 
-			while (scan.hasNext()) {
-				System.out.println(scan.nextLine());
+				while (scan.hasNext()) {
+					System.out.println(scan.nextLine());
+				}
+				System.out.println();
+
+				fileReader = new FileReader("./testcase/" + fileName);
+
+				Term rpcProgram = parser.Parsing(fileReader);
+				TypedTerm typedRPCProgram = Infer.infer(rpcProgram);
+				com.example.starpc.StaTerm rpcStaProgram = CompRPCStaTerm.compStaTerm(typedRPCProgram);
+
+				TripleTup<com.example.stacs.StaTerm, com.example.stacs.FunStore, com.example.stacs.FunStore> csStaTerm = CompCSStaTerm
+						.compCSStaTerm(rpcStaProgram);
+
+				StaTerm mainExpr = csStaTerm.getFirst();
+				FunStore clientFS = csStaTerm.getSecond();
+				FunStore serverFS = csStaTerm.getThird();
+
+				String programName = fileName.substring(0, fileName.indexOf("."));
+				
+				was.setServerFS(programName, serverFS);
+				
+				Thread clientThread = new Thread(() -> {
+					CSClient client = new CSClient(serverAddr, programName, clientFS);
+					StaValue result = client.evalClient(mainExpr);
+
+					System.out.println("result: " + result);
+				});
+
+				clientThread.start();
+				clientThread.join();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (LexerException e) {
+				e.printStackTrace();
+			} catch (ParserException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			System.out.println();
-
-			fileReader = new FileReader("./testcase/" + fileName);
-
-			Term rpcProgram = parser.Parsing(fileReader);
-			TypedTerm typedRPCProgram = Infer.infer(rpcProgram);
-			com.example.starpc.StaTerm rpcStaProgram = CompRPCStaTerm.compStaTerm(typedRPCProgram);
-
-			TripleTup<com.example.stacs.StaTerm, com.example.stacs.FunStore, com.example.stacs.FunStore> csStaTerm = CompCSStaTerm
-					.compCSStaTerm(rpcStaProgram);
-
-			StaTerm mainExpr = csStaTerm.getFirst();
-			FunStore clientFS = csStaTerm.getSecond();
-			FunStore serverFS = csStaTerm.getThird();
-
-			String programName = fileName.substring(0, fileName.indexOf("."));
-
-			Thread serverThread = new Thread(() -> {
-				HttpServer server = new HttpServer(programName, serverFS);
-				server.start();
-			});
-			Thread clientThread = new Thread(() -> {
-				CSClient client = new CSClient(serverAddr, programName, clientFS);
-				StaValue result = client.evalClient(mainExpr);
-
-				System.out.println("result: " + result);
-			});
-
-			serverThread.start();
-			clientThread.start();
-
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		catch (LexerException e) {
-			e.printStackTrace();
-		}
-		catch (ParserException e) {
-			e.printStackTrace();
 		}
 
 	}
@@ -87,14 +92,14 @@ public class TypedCSHttp {
 	public static class CSClient {
 		private static final String OPEN_SESSION = "OPEN_SESSION";
 		private static final String CLOSE_SESSION = "CLOSE_SESSION";
-		
+
 		private static final String REQ = "REQ";
 		private static final String RET = "RET";
 		private static final String REPLY = "REPLY";
 		private static final String CALL = "CALL";
-		
+
 		private static final int PORT = 8080;
-		
+
 		private FunStore clientFS;
 		private String programName;
 		private String serverAddr;
@@ -118,17 +123,15 @@ public class TypedCSHttp {
 		}
 
 		private void connectServer() {
-			if (socket == null || !socket.isConnected()) {
+			if (socket == null || socket.isClosed()) {
 				try {
 					socket = new Socket(serverAddr, PORT);
 
 					reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					writer = new PrintWriter(socket.getOutputStream(), true);
-				}
-				catch (UnknownHostException e) {
+				} catch (UnknownHostException e) {
 					e.printStackTrace();
-				}
-				catch (IOException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -167,8 +170,7 @@ public class TypedCSHttp {
 						try {
 							if (sessionState.equals(CLOSE_SESSION)) {
 								sessionNum = null;
-							}
-							else {
+							} else {
 								sessionNum = Integer.parseInt(sessionState);
 							}
 
@@ -178,8 +180,7 @@ public class TypedCSHttp {
 								StaValue replyVal = JSonUtil.fromJson(replyJson);
 
 								retM = new Let(mLet.getY(), replyVal, mLet.getM2());
-							}
-							else if (protocol.equals(CALL)) {
+							} else if (protocol.equals(CALL)) {
 								String strClo = reader.readLine();
 								JSONObject cloJson = (JSONObject) jsonParser.parse(strClo);
 								StaValue clo = JSonUtil.fromJson(cloJson);
@@ -196,36 +197,30 @@ public class TypedCSHttp {
 								}
 
 								retM = new Let(mLet.getY(), new App(clo, args), mLet.getM2());
-							}
-							else {
+							} else {
 								System.err.println("receiver: Unexpected protocol(" + protocol + ")");
 								retM = null;
 							}
-						}
-						catch (NumberFormatException e) {
+						} catch (NumberFormatException e) {
+							e.printStackTrace();
+							retM = null;
+						} catch (ParseException e) {
 							e.printStackTrace();
 							retM = null;
 						}
-						catch (ParseException e) {
-							e.printStackTrace();
-							retM = null;
-						}
-					}
-					else {
+					} else {
 						System.err.println(statusCode);
 						retM = null;
 					}
 
-				}
-				catch (IOException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 					retM = null;
 				}
 
 				try {
 					socket.close();
-				}
-				catch (IOException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 
@@ -247,11 +242,13 @@ public class TypedCSHttp {
 
 							ClosedFun closedFun = lookup(clientFS, fClo.getF());
 
-							m = CSStaMain.substs(CSStaMain.substs(closedFun.getM(), closedFun.getZs(), fClo.getVs()),
-									closedFun.getXs(), mApp1.getWs());
+							m = new Let(mLet.getY(),
+									CSStaMain.substs(
+											CSStaMain.substs(closedFun.getM(), closedFun.getZs(), fClo.getVs()),
+											closedFun.getXs(), mApp1.getWs()),
+									mLet.getM2());
 						}
-					}
-					else if (m1 instanceof Req) {
+					} else if (m1 instanceof Req) {
 						Req mReq1 = (Req) m1;
 
 						if (mReq1.getF() instanceof Clo) {
@@ -272,26 +269,22 @@ public class TypedCSHttp {
 
 							m = receiver.apply(mLet);
 						}
-					}
-					else if (m1 instanceof Clo) {
+					} else if (m1 instanceof Clo) {
 						Clo mClo1 = (Clo) m1;
 
 						m = CSStaMain.subst(mLet.getM2(), mLet.getY(), mClo1);
-					}
-					else if (m1 instanceof Const) {
+					} else if (m1 instanceof Const) {
 						Const mConst1 = (Const) m1;
 
 						m = CSStaMain.subst(mLet.getM2(), mLet.getY(), mConst1);
-					}
-					else if (m1 instanceof Let) {
+					} else if (m1 instanceof Let) {
 						Let mLet1 = (Let) m1;
 
 						Let let = new Let(mLet1.getY(), mLet1.getM1(),
 								new Let(mLet.getY(), mLet1.getM2(), mLet.getM2()));
 
 						m = let;
-					}
-					else if (m1 instanceof Ret) {
+					} else if (m1 instanceof Ret) {
 						Ret mRet1 = (Ret) m1;
 						StaValue retVal = mRet1.getW();
 
@@ -302,11 +295,9 @@ public class TypedCSHttp {
 
 						m = receiver.apply(mLet);
 					}
-				}
-				else if (m instanceof Clo || m instanceof Const) {
+				} else if (m instanceof Clo || m instanceof Const) {
 					return (StaValue) m;
-				}
-				else {
+				} else {
 					System.err.println("TypedCSHttp.evalClient: Must not reach here");
 				}
 			}

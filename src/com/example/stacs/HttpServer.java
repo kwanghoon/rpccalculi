@@ -34,7 +34,15 @@ public class HttpServer {
 
 	public String protocol;
 
+	public HttpServer() {
+		
+	}
+	
 	public HttpServer(String programName, FunStore phi) {
+		setServerFS(programName, phi);
+	}
+	
+	public void setServerFS(String programName, FunStore phi) {
 		if (!programFSMap.keySet().contains(programName)) {
 			programFSMap.put(programName, phi);
 		}
@@ -49,7 +57,9 @@ public class HttpServer {
 
 				// GET /rpc/programName HTTP/1.1\r\n
 				BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output));
 				String request = reader.readLine();
+				System.out.println(request);
 				// method와 version 사이에 있는 url을 추출하기 위해 필요
 				int idxMethod = request.indexOf(" ");
 				int idxVersion = request.indexOf(" ", idxMethod + 1);
@@ -83,26 +93,24 @@ public class HttpServer {
 							server.start();
 						});
 						th.start();
-					}
-					else {
+					} else {
 						session = Integer.parseInt(sessionState);
 
 						server = sessionMap.get(session);
 
-						server.connectClient(conn);
-						protocol.notify();
+						server.connectClient(conn, reader, writer);
+						server.serverNotify();
 					}
-				}
-				else {
+				} else {
 					// program에 대한 funstore가 등록되지 않은 경우
 					System.err.println("program funstore not found");
 				}
 			}
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
@@ -123,6 +131,8 @@ public class HttpServer {
 		private BufferedReader reader;
 		private BufferedWriter writer;
 
+		private String lock;
+
 		CSServer(FunStore phi, int sessionNum, Socket conn) throws IOException {
 			this.phi = phi;
 			this.sessionNum = sessionNum;
@@ -132,6 +142,12 @@ public class HttpServer {
 			this.conn = conn;
 			reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			writer = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+
+			lock = "";
+		}
+
+		public String getLock() {
+			return lock;
 		}
 
 		@Override
@@ -139,16 +155,14 @@ public class HttpServer {
 			handleClient();
 		}
 
-		public void connectClient(Socket socket) {
-			try {
-				conn = socket;
+		public void connectClient(Socket socket, BufferedReader reader, BufferedWriter writer) {
+			conn = socket;
 
-				reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-				writer = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
+			this.reader = reader;
+			this.writer = writer;
+//				reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//				writer = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+
 		}
 
 		private void handleClient() {
@@ -176,17 +190,14 @@ public class HttpServer {
 					StaTerm reqTerm = new Let(rStr, new App(cloFn, args), rVar);
 
 					evalServer(reqTerm, 0);
-				}
-				else {
+				} else {
 					System.err.println("Unexpected protocol(" + protocol + ")");
 					writeHeader(400, "Bad Request");
 					writer.flush();
 				}
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
-			}
-			catch (ParseException e) {
+			} catch (ParseException e) {
 				e.printStackTrace();
 			}
 		}
@@ -196,9 +207,24 @@ public class HttpServer {
 				writer.write("HTTP/1.1 " + code + " " + message + "\r\n");
 				writer.write("Date: " + new Date() + "\r\n");
 				writer.write("Server: " + "Apache 2.0\r\n\r\n");
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
+			}
+		}
+
+		private void serverWait() throws InterruptedException {
+			synchronized (lock) {
+				System.out.println("server wait...");
+				lock.wait();
+				System.out.println("server wait done");
+			}
+		}
+
+		public void serverNotify() throws InterruptedException {
+			synchronized (lock) {
+				System.out.println("server notify...");
+				lock.notify();
+				System.out.println("server notify done");
 			}
 		}
 
@@ -225,8 +251,7 @@ public class HttpServer {
 
 							m = let;
 						}
-					}
-					else if (m1 instanceof Call) {
+					} else if (m1 instanceof Call) {
 						Call mCall1 = (Call) m1;
 
 						if (mCall1.getF() instanceof Clo) {
@@ -246,7 +271,7 @@ public class HttpServer {
 								writer.flush();
 
 								// object wait 시키기
-								this.wait();
+								serverWait();
 
 								while (true) {
 									if (protocol.equals(RET)) {
@@ -257,18 +282,21 @@ public class HttpServer {
 										m = new Let(mLet.getY(), retVal, mLet.getM2());
 
 										break;
-									}
-									else if (protocol.equals(REQ)) {
+									} else if (protocol.equals(REQ)) {
+										System.out.println("read line 0");
 										String cloFnInStr = reader.readLine();
+										System.out.println("read line 1 " + cloFnInStr);
 										JSONObject cloFnInJson = (JSONObject) jsonParser.parse(cloFnInStr);
 										StaValue cloFn = JSonUtil.fromJson(cloFnInJson);
 
 										String numOfArgsInStr = reader.readLine();
+										System.out.println("read line 2");
 										int numOfArgs = Integer.parseInt(numOfArgsInStr);
 										ArrayList<StaValue> cloFnArgs = new ArrayList<>();
 
 										for (int i = 0; i < numOfArgs; i++) {
 											String argInStr = reader.readLine();
+											System.out.println("read line 3");
 											JSONObject argInJson = (JSONObject) jsonParser.parse(argInStr);
 											StaValue arg = JSonUtil.fromJson(argInJson);
 
@@ -281,35 +309,29 @@ public class HttpServer {
 										StaTerm reqTerm = new Let(rStr, new App(cloFn, args), rVar);
 
 										evalServer(reqTerm, stackDepth + 1);
-									}
-									else {
+									} else {
 										System.err.println("evalServer(Call) Must not reach here. " + protocol);
 									}
 								}
-							}
-							catch (IOException e) {
+							} catch (IOException e) {
 								e.printStackTrace();
 								writeHeader(500, "Internal Server Error");
-							}
-							catch (InterruptedException e) {
+							} catch (InterruptedException e) {
 								e.printStackTrace();
 								writeHeader(500, "Internal Server Error");
 							}
 						}
-					}
-					else if (m1 instanceof Clo) {
+					} else if (m1 instanceof Clo) {
 						Clo mClo1 = (Clo) m1;
 
 						StaTerm st = CSStaMain.subst(mLet.getM2(), mLet.getY(), mClo1);
 						m = st;
-					}
-					else if (m1 instanceof Const) {
+					} else if (m1 instanceof Const) {
 						Const mConst1 = (Const) m1;
 
 						StaTerm st = CSStaMain.subst(mLet.getM2(), mLet.getY(), mConst1);
 						m = st;
-					}
-					else if (m1 instanceof Let) {
+					} else if (m1 instanceof Let) {
 						Let mLet1 = (Let) m1;
 
 						Let let = new Let(mLet1.getY(), mLet1.getM1(),
@@ -317,8 +339,7 @@ public class HttpServer {
 						m = let;
 					}
 
-				}
-				else if (m instanceof Clo) {
+				} else if (m instanceof Clo) {
 					Clo mClo = (Clo) m;
 
 					try {
@@ -334,18 +355,15 @@ public class HttpServer {
 						writer.write(mClo.toJson() + "\n");
 						writer.flush();
 
-						this.wait();
-					}
-					catch (IOException e) {
+						serverWait();
+					} catch (IOException e) {
 						e.printStackTrace();
-					}
-					catch (InterruptedException e) {
+					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 
 					return;
-				}
-				else if (m instanceof Const) {
+				} else if (m instanceof Const) {
 					Const mConst = (Const) m;
 
 					try {
@@ -361,12 +379,10 @@ public class HttpServer {
 						writer.write(mConst.toJson() + "\n");
 						writer.flush();
 
-						this.wait();
-					}
-					catch (IOException e) {
+						serverWait();
+					} catch (IOException e) {
 						e.printStackTrace();
-					}
-					catch (InterruptedException e) {
+					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 

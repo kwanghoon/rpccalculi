@@ -59,8 +59,8 @@ public class HttpServer {
 				BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output));
 				String request = reader.readLine();
-				System.out.println(request);
-				// method와 version 사이에 있는 url을 추출하기 위해 필요
+//				System.out.println(request);
+				// method�� version �궗�씠�뿉 �엳�뒗 url�쓣 異붿텧�븯湲� �쐞�빐 �븘�슂
 				int idxMethod = request.indexOf(" ");
 				int idxVersion = request.indexOf(" ", idxMethod + 1);
 				String url = request.substring(idxMethod + 1, idxVersion);
@@ -68,8 +68,8 @@ public class HttpServer {
 				String urlProgramName = url.substring(5, url.length());
 
 				if (programFSMap.keySet().contains(urlProgramName)) {
-					// program에 대한 funstore가 정상적으로 등록되어 있는 경우
-					// entity body까지 읽어서 데이터 추출
+					// program�뿉 ���븳 funstore媛� �젙�긽�쟻�쑝濡� �벑濡앸릺�뼱 �엳�뒗 寃쎌슦
+					// entity body源뚯� �씫�뼱�꽌 �뜲�씠�꽣 異붿텧
 					String line;
 					while (!(line = reader.readLine()).equals(""))
 						;
@@ -83,14 +83,16 @@ public class HttpServer {
 
 					if (sessionState.equals(OPEN_SESSION)) {
 						session = newSession();
+						
+//						System.out.println("Session " + session + " begins ...");
 
 						FunStore phi = programFSMap.get(urlProgramName);
-						server = new CSServer(phi, session, conn);
+						server = new CSServer(phi, session, conn, reader, writer);
 
 						sessionMap.put(count, server);
 
 						Thread th = new Thread(() -> {
-							server.start();
+							server.run();
 						});
 						th.start();
 					} else {
@@ -99,10 +101,13 @@ public class HttpServer {
 						server = sessionMap.get(session);
 
 						server.connectClient(conn, reader, writer);
-						server.serverNotify();
+
+						synchronized (server.getLock()) {
+							server.getLock().notify();
+						}
 					}
 				} else {
-					// program에 대한 funstore가 등록되지 않은 경우
+					// program�뿉 ���븳 funstore媛� �벑濡앸릺吏� �븡�� 寃쎌슦
 					System.err.println("program funstore not found");
 				}
 			}
@@ -110,9 +115,7 @@ public class HttpServer {
 			e.printStackTrace();
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		} 
 	}
 
 	private int newSession() {
@@ -121,7 +124,7 @@ public class HttpServer {
 		return count;
 	}
 
-	class CSServer extends Thread {
+	class CSServer {
 		private FunStore phi;
 		private int sessionNum;
 
@@ -133,15 +136,15 @@ public class HttpServer {
 
 		private String lock;
 
-		CSServer(FunStore phi, int sessionNum, Socket conn) throws IOException {
+		CSServer(FunStore phi, int sessionNum, Socket conn, BufferedReader reader, BufferedWriter writer) throws IOException {
 			this.phi = phi;
 			this.sessionNum = sessionNum;
 
 			jsonParser = new JSONParser();
 
 			this.conn = conn;
-			reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-			writer = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+			this.reader = reader;
+			this.writer = writer;
 
 			lock = "";
 		}
@@ -150,7 +153,6 @@ public class HttpServer {
 			return lock;
 		}
 
-		@Override
 		public void run() {
 			handleClient();
 		}
@@ -160,9 +162,6 @@ public class HttpServer {
 
 			this.reader = reader;
 			this.writer = writer;
-//				reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//				writer = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-
 		}
 
 		private void handleClient() {
@@ -190,6 +189,13 @@ public class HttpServer {
 					StaTerm reqTerm = new Let(rStr, new App(cloFn, args), rVar);
 
 					evalServer(reqTerm, 0);
+					
+					reader.close();
+					writer.close();
+					
+					sessionMap.remove(sessionNum);
+					
+//					System.out.println("Session " + sessionNum + " ends...");
 				} else {
 					System.err.println("Unexpected protocol(" + protocol + ")");
 					writeHeader(400, "Bad Request");
@@ -209,22 +215,6 @@ public class HttpServer {
 				writer.write("Server: " + "Apache 2.0\r\n\r\n");
 			} catch (IOException e) {
 				e.printStackTrace();
-			}
-		}
-
-		private void serverWait() throws InterruptedException {
-			synchronized (lock) {
-				System.out.println("server wait...");
-				lock.wait();
-				System.out.println("server wait done");
-			}
-		}
-
-		public void serverNotify() throws InterruptedException {
-			synchronized (lock) {
-				System.out.println("server notify...");
-				lock.notify();
-				System.out.println("server notify done");
 			}
 		}
 
@@ -258,20 +248,22 @@ public class HttpServer {
 							try {
 								Clo fClo = (Clo) mCall1.getF();
 								ArrayList<StaValue> args = mCall1.getWs();
-
-								// Client로 Call을 날리는 부분
-								writeHeader(200, "OK");
-								writer.write(sessionNum + "\n");
-								writer.write(CALL + "\n");
-								writer.write(fClo.toJson() + "\n");
-								writer.write(args.size() + "\n");
-								for (StaValue arg : args) {
-									writer.write(arg.toJson() + "\n");
+	
+								synchronized(lock) { 
+									// Client濡� Call�쓣 �궇由щ뒗 遺�遺�
+									writeHeader(200, "OK");
+									writer.write(sessionNum + "\n");
+									writer.write(CALL + "\n");
+									writer.write(fClo.toJson() + "\n");
+									writer.write(args.size() + "\n");
+									for (StaValue arg : args) {
+										writer.write(arg.toJson() + "\n");
+									}
+									writer.flush();
+	
+									// object wait �떆�궎湲�
+									lock.wait();
 								}
-								writer.flush();
-
-								// object wait 시키기
-								serverWait();
 
 								while (true) {
 									if (protocol.equals(RET)) {
@@ -283,20 +275,16 @@ public class HttpServer {
 
 										break;
 									} else if (protocol.equals(REQ)) {
-										System.out.println("read line 0");
 										String cloFnInStr = reader.readLine();
-										System.out.println("read line 1 " + cloFnInStr);
 										JSONObject cloFnInJson = (JSONObject) jsonParser.parse(cloFnInStr);
 										StaValue cloFn = JSonUtil.fromJson(cloFnInJson);
 
 										String numOfArgsInStr = reader.readLine();
-										System.out.println("read line 2");
 										int numOfArgs = Integer.parseInt(numOfArgsInStr);
 										ArrayList<StaValue> cloFnArgs = new ArrayList<>();
 
 										for (int i = 0; i < numOfArgs; i++) {
 											String argInStr = reader.readLine();
-											System.out.println("read line 3");
 											JSONObject argInJson = (JSONObject) jsonParser.parse(argInStr);
 											StaValue arg = JSonUtil.fromJson(argInJson);
 
@@ -344,18 +332,22 @@ public class HttpServer {
 
 					try {
 						// REPLY
-						writeHeader(200, "OK");
-
-						if (stackDepth == 0)
-							writer.write(CLOSE_SESSION + "\n");
-						else
-							writer.write(sessionNum + "\n");
-
-						writer.write(REPLY + "\n");
-						writer.write(mClo.toJson() + "\n");
-						writer.flush();
-
-						serverWait();
+						synchronized(lock) {
+							writeHeader(200, "OK");
+	
+							if (stackDepth == 0)
+								writer.write(CLOSE_SESSION + "\n");
+							else
+								writer.write(sessionNum + "\n");
+	
+							writer.write(REPLY + "\n");
+							writer.write(mClo.toJson() + "\n");
+							writer.flush();
+	
+							if(stackDepth > 0)
+								lock.wait();
+						}
+						
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (InterruptedException e) {
@@ -368,18 +360,21 @@ public class HttpServer {
 
 					try {
 						// REPLY
-						writeHeader(200, "OK");
-
-						if (stackDepth == 0)
-							writer.write(CLOSE_SESSION + "\n");
-						else
-							writer.write(sessionNum + "\n");
-
-						writer.write(REPLY + "\n");
-						writer.write(mConst.toJson() + "\n");
-						writer.flush();
-
-						serverWait();
+						synchronized(lock) {
+							writeHeader(200, "OK");
+	
+							if (stackDepth == 0)
+								writer.write(CLOSE_SESSION + "\n");
+							else
+								writer.write(sessionNum + "\n");
+	
+							writer.write(REPLY + "\n");
+							writer.write(mConst.toJson() + "\n");
+							writer.flush();
+	
+							if(stackDepth > 0 ) 
+								lock.wait();
+						}
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (InterruptedException e) {

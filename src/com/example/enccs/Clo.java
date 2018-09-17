@@ -2,6 +2,9 @@ package com.example.enccs;
 
 import java.util.ArrayList;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 public class Clo extends EncValue {
 	private String f;
 	private ArrayList<EncValue> vs;
@@ -46,4 +49,25 @@ public class Clo extends EncValue {
 		return ret;
 	}
 	
+	public static final String Clo = "Clo";
+	public static final String Fvs = "Fvs";
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject toJson() {
+		JSONObject jsonObject = new JSONObject();
+		
+		// Function name
+		jsonObject.put(Clo, f);
+		
+		// Free variables
+		JSONArray jsonArray = new JSONArray();
+		for(EncValue sv : vs) {
+			jsonArray.add(sv.toJson());
+		}
+		
+		jsonObject.put(Fvs, jsonArray);
+	
+		return jsonObject;
+	}
 }

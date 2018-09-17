@@ -152,7 +152,7 @@ public class TypedCSHttp {
 					// HTTP_VERSION STATUS_CODE PHRASE
 					String statusLine = reader.readLine();
 
-					// 잘 왔는지를 확인하기 위해서 필요!
+					// �옒 �솕�뒗吏�瑜� �솗�씤�븯湲� �쐞�빐�꽌 �븘�슂!
 					int idxVersion = statusLine.indexOf(" ");
 					int idxPhrase = statusLine.indexOf(" ", idxVersion + 1);
 
@@ -160,7 +160,7 @@ public class TypedCSHttp {
 
 					if (statusCode == 200) {
 						String line;
-						// entity body 이전인 \r\n에 도달할 때까지 읽기
+						// entity body �씠�쟾�씤 \r\n�뿉 �룄�떖�븷 �븣源뚯� �씫湲�
 						while (!(line = reader.readLine()).equals(""))
 							;
 
@@ -217,7 +217,7 @@ public class TypedCSHttp {
 					e.printStackTrace();
 					retM = null;
 				}
-
+				
 				try {
 					socket.close();
 				} catch (IOException e) {
@@ -289,13 +289,14 @@ public class TypedCSHttp {
 						StaValue retVal = mRet1.getW();
 
 						writeHeader();
-						writer.println(sessionNum); // RET의 경우 sessionNum가 null인 상태는 있을 수가 없음
+						writer.println(sessionNum); // RET�쓽 寃쎌슦 sessionNum媛� null�씤 �긽�깭�뒗 �엳�쓣 �닔媛� �뾾�쓬
 						writer.println(RET);
 						writer.println(retVal.toJson());
 
 						m = receiver.apply(mLet);
 					}
 				} else if (m instanceof Clo || m instanceof Const) {
+					
 					return (StaValue) m;
 				} else {
 					System.err.println("TypedCSHttp.evalClient: Must not reach here");

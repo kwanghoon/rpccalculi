@@ -126,7 +126,7 @@ public class TypedCSEncInThread {
 			try {
 				client = serverSock.accept();
 				input = new BufferedReader(new InputStreamReader(client.getInputStream()));
-				output = new PrintWriter(new OutputStreamWriter(client.getOutputStream()));
+				output = new PrintWriter(new OutputStreamWriter(client.getOutputStream()), true);
 
 				while (true) {
 					String protocol = input.readLine();
@@ -251,7 +251,7 @@ public class TypedCSEncInThread {
 				try {
 					server = new Socket(serverAddr, PORT);
 					input = new BufferedReader(new InputStreamReader(server.getInputStream()));
-					output = new PrintWriter(new OutputStreamWriter(server.getOutputStream()));
+					output = new PrintWriter(new OutputStreamWriter(server.getOutputStream()), true);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

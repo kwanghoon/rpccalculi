@@ -59,8 +59,8 @@ public class HttpServer {
 				BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output));
 				String request = reader.readLine();
-//				System.out.println(request);
-				// method�� version �궗�씠�뿉 �엳�뒗 url�쓣 異붿텧�븯湲� �쐞�빐 �븘�슂
+
+				// method와 version 사이에 있는 url(프로그램명)을 추출하기 위해 필요
 				int idxMethod = request.indexOf(" ");
 				int idxVersion = request.indexOf(" ", idxMethod + 1);
 				String url = request.substring(idxMethod + 1, idxVersion);
@@ -68,8 +68,8 @@ public class HttpServer {
 				String urlProgramName = url.substring(5, url.length());
 
 				if (programFSMap.keySet().contains(urlProgramName)) {
-					// program�뿉 ���븳 funstore媛� �젙�긽�쟻�쑝濡� �벑濡앸릺�뼱 �엳�뒗 寃쎌슦
-					// entity body源뚯� �씫�뼱�꽌 �뜲�씠�꽣 異붿텧
+					// program에 대한 funstore가 정상적으로 등록되어 있는 경우
+					// entity body까지 읽어들임
 					String line;
 					while (!(line = reader.readLine()).equals(""))
 						;
@@ -83,8 +83,6 @@ public class HttpServer {
 
 					if (sessionState.equals(OPEN_SESSION)) {
 						session = newSession();
-						
-//						System.out.println("Session " + session + " begins ...");
 
 						FunStore phi = programFSMap.get(urlProgramName);
 						server = new CSServer(phi, session, conn, reader, writer);
@@ -107,7 +105,7 @@ public class HttpServer {
 						}
 					}
 				} else {
-					// program�뿉 ���븳 funstore媛� �벑濡앸릺吏� �븡�� 寃쎌슦
+					// program에 대한 funstore가 등록되지 않은 경우
 					System.err.println("program funstore not found");
 				}
 			}
@@ -195,7 +193,6 @@ public class HttpServer {
 					
 					sessionMap.remove(sessionNum);
 					
-//					System.out.println("Session " + sessionNum + " ends...");
 				} else {
 					System.err.println("Unexpected protocol(" + protocol + ")");
 					writeHeader(400, "Bad Request");
@@ -249,8 +246,10 @@ public class HttpServer {
 								Clo fClo = (Clo) mCall1.getF();
 								ArrayList<StaValue> args = mCall1.getWs();
 	
+								// lock을 wait하기 전에 client에서 요청을 보내 wait하기 전에 notify를 할 수 있기 때문에
+								// 하나의 연결되는 동작처럼 보내주고 wait을 해줘야됨
 								synchronized(lock) { 
-									// Client濡� Call�쓣 �궇由щ뒗 遺�遺�
+									// Client로 Call을 날리는 부분
 									writeHeader(200, "OK");
 									writer.write(sessionNum + "\n");
 									writer.write(CALL + "\n");
@@ -261,7 +260,7 @@ public class HttpServer {
 									}
 									writer.flush();
 	
-									// object wait �떆�궎湲�
+									// object wait 시키기
 									lock.wait();
 								}
 

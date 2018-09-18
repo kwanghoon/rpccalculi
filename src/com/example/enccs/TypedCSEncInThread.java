@@ -128,33 +128,32 @@ public class TypedCSEncInThread {
 				input = new BufferedReader(new InputStreamReader(client.getInputStream()));
 				output = new PrintWriter(new OutputStreamWriter(client.getOutputStream()), true);
 
-				while (true) {
-					String protocol = input.readLine();
-					
-					if (REQ.equals(protocol)) {
-						String cloFnInStr = input.readLine();
-						JSONObject cloFnInJson = (JSONObject) jsonParser.parse(cloFnInStr);
-						EncValue cloFn = JSonUtil.fromJson(cloFnInJson);
+				String protocol = input.readLine();
 
-						String numOfArgsInStr = input.readLine();
-						int numOfArgs = Integer.parseInt(numOfArgsInStr);
-						ArrayList<EncValue> args = new ArrayList<>();
+				if (REQ.equals(protocol)) {
+					String cloFnInStr = input.readLine();
+					JSONObject cloFnInJson = (JSONObject) jsonParser.parse(cloFnInStr);
+					EncValue cloFn = JSonUtil.fromJson(cloFnInJson);
 
-						for (int i = 0; i < numOfArgs; i++) {
-							String argInStr = input.readLine();
-							JSONObject argInJson = (JSONObject) jsonParser.parse(argInStr);
-							EncValue arg = JSonUtil.fromJson(argInJson);
+					String numOfArgsInStr = input.readLine();
+					int numOfArgs = Integer.parseInt(numOfArgsInStr);
+					ArrayList<EncValue> args = new ArrayList<>();
 
-							args.add(arg);
-						}
+					for (int i = 0; i < numOfArgs; i++) {
+						String argInStr = input.readLine();
+						JSONObject argInJson = (JSONObject) jsonParser.parse(argInStr);
+						EncValue arg = JSonUtil.fromJson(argInJson);
 
-						EncTerm reqTerm = new App(cloFn, args);
-
-						evalServer(reqTerm);
-					} else {
-						System.err.println("Not expected: " + protocol);
+						args.add(arg);
 					}
+
+					EncTerm reqTerm = new App(cloFn, args);
+
+					evalServer(reqTerm);
+				} else {
+					System.err.println("Not expected: " + protocol);
 				}
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ParseException e) {
@@ -181,7 +180,7 @@ public class TypedCSEncInThread {
 
 					if (mCall.getCall() instanceof Clo) {
 						Clo callClo = (Clo) mCall.getCall();
-						ArrayList<EncValue> args = callClo.getVs();
+						ArrayList<EncValue> args = mCall.getArgs();
 
 						output.println(CALL);
 						output.println(callClo.toJson());
@@ -236,13 +235,13 @@ public class TypedCSEncInThread {
 			}
 
 			BufferedReader input() {
-				if (this.input == null)
+				if (server == null || server.isClosed())
 					connect();
 				return this.input;
 			}
 
 			PrintWriter output() {
-				if (this.output == null)
+				if (server == null || server.isClosed())
 					connect();
 				return this.output;
 			}
@@ -252,6 +251,14 @@ public class TypedCSEncInThread {
 					server = new Socket(serverAddr, PORT);
 					input = new BufferedReader(new InputStreamReader(server.getInputStream()));
 					output = new PrintWriter(new OutputStreamWriter(server.getOutputStream()), true);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			public void disconnect() {
+				try {
+					server.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -309,6 +316,9 @@ public class TypedCSEncInThread {
 					e.printStackTrace();
 					retm = null;
 				}
+
+				conn.disconnect();
+
 				return retm;
 			};
 

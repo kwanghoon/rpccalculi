@@ -56,6 +56,9 @@ public class TypedCSEnc {
 	
 	public static Either<EncTerm, Pair<ClientContext, EncTerm>> evalClient(FunStore phi, EncTerm m) {
 		Either<EncTerm, Pair<ClientContext, EncTerm>> either = new Either<>();
+		
+		System.out.println("EncCS Client: " + m);
+		
 		if (m instanceof Let) {
 			Let mLet = (Let) m;
 			EncTerm m1 = mLet.getM1();
@@ -119,6 +122,8 @@ public class TypedCSEnc {
 	
 	public static Either<EncTerm, Pair<ClientContext, EncTerm>> evalServer(FunStore phi, ClientContext clientCtx, EncTerm m) {
 		Either<EncTerm, Pair<ClientContext, EncTerm>> either = new Either<>();
+		
+		System.out.println("EncCS Server: " + m);
 		
 		if (m instanceof App) {
 			App mApp = (App) m;

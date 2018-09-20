@@ -233,6 +233,11 @@ public class TypedCSEncInHttp {
 						EncTerm reqTerm = new App(cloFn, args);
 
 						evalServer(reqTerm);
+						
+						reader.close();
+						writer.close();
+						
+						sessionMap.remove(session);
 					} else {
 						System.err.println("Not expected: " + protocol);
 					}
@@ -271,7 +276,7 @@ public class TypedCSEncInHttp {
 							ArrayList<EncValue> args = mCall.getArgs();
 
 							writeHeader(200, "OK");
-							writer.println(session);
+							writer.println(CLOSE_SESSION);
 							writer.println(CALL);
 							writer.println(callClo.toJson());
 							writer.println(args.size());
@@ -285,7 +290,7 @@ public class TypedCSEncInHttp {
 						Clo mClo = (Clo) m;
 
 						writeHeader(200, "OK");
-						writer.println(session);
+						writer.println(CLOSE_SESSION);
 						writer.println(REPLY);
 						writer.println(mClo.toJson());
 
@@ -294,7 +299,7 @@ public class TypedCSEncInHttp {
 						Const mConst = (Const) m;
 
 						writeHeader(200, "OK");
-						writer.println(session);
+						writer.println(CLOSE_SESSION);
 						writer.println(REPLY);
 						writer.println(mConst.toJson());
 
@@ -389,7 +394,6 @@ public class TypedCSEncInHttp {
 							retm = new Let(mLet.getVal(), replyVal, mLet.getM2());
 						} else if (CALL.equals(protocol)) {
 							String cloInStr = reader.readLine();
-//							System.out.println(cloInStr);
 							JSONObject cloInJson = (JSONObject) jsonParser.parse(cloInStr);
 							EncValue clo = JSonUtil.fromJson(cloInJson);
 

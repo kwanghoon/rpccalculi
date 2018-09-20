@@ -33,7 +33,7 @@ public class Clo extends EncValue {
 
 	@Override
 	public String toString() {
-		String ret = "Clo(" + f + ", ";
+		String ret = "Clo(" + f + ", {";
 		int cnt = 0;
 		
 		for (EncValue v : vs) {
@@ -44,7 +44,7 @@ public class Clo extends EncValue {
 				cnt++;
 			}
 		}
-		ret += ")";
+		ret += "})";
 		
 		return ret;
 	}

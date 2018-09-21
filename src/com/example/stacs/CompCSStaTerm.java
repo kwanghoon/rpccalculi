@@ -45,7 +45,7 @@ public class CompCSStaTerm {
 			
 			Pair<Integer, TripleTup<StaTerm, FunStore, FunStore>> p1 = comp(i, rtLam.getM(), strs);
 			ClosedFun closedFun = new ClosedFun(zs, rtLam.getLoc(), rtLam.getXs(), p1.getValue().getFirst());
-			String f = "f" + p1.getKey();
+			String f = "_gf" + p1.getKey();
 			FunStore clientFS = p1.getValue().getSecond();
 			FunStore serverFS = p1.getValue().getThird();
 			

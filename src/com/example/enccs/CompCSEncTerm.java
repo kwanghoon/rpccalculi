@@ -2,6 +2,7 @@ package com.example.enccs;
 
 import java.util.ArrayList;
 
+import com.example.encrpc.RPCEncMain;
 import com.example.rpc.Location;
 import com.example.utils.TripleTup;
 
@@ -42,8 +43,12 @@ public class CompCSEncTerm {
 			strs.addAll(ttLam.getStrArr());
 			
 			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p1 = comp(i, ttLam.getTerm(), strs);
-			ClosedFun closedFun = new ClosedFun(zs, ttLam.getLoc(), ttLam.getStrArr(), p1.getValue().getFirst());
+			
+			ArrayList<String> fvs = RPCEncMain.fv(ttLam);
+			ClosedFun closedFun = new ClosedFun(fvs, ttLam.getLoc(), ttLam.getStrArr(), p1.getValue().getFirst());
+			
 			String f = "_gf" + p1.getKey();
+			
 			FunStore clientFS = p1.getValue().getSecond();
 			FunStore serverFS = p1.getValue().getThird();
 			

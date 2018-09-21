@@ -113,4 +113,72 @@ public class RPCEncMain {
 		
 		return encTerm;
 	}
+	
+	public static ArrayList<String> fv(EncTerm m) {
+		ArrayList<String> retList = new ArrayList<>();
+		
+		if (m instanceof Const) {
+			return retList;
+		}
+		else if (m instanceof Var) {
+			Var mVar = (Var) m;
+			
+			retList.add(mVar.getX());
+			
+			return retList;
+		}
+		else if (m instanceof Lam) {
+			Lam mLam = (Lam) m;
+			
+			// addAll 자체가 union을 위해 존재
+			retList.addAll(fv(mLam.getTerm()));			// fv mbody
+			retList.removeAll(mLam.getStrArr());		// (fv mbody) \\ xs
+			
+			return retList;
+		}
+		else if (m instanceof Call) {
+			Call mCall = (Call) m;
+			
+			retList.addAll(fv(mCall.getCall()));
+			
+			for (EncValue v: mCall.getArgs()) {
+				retList.addAll(fv(v));
+			}
+			
+			return retList;
+		}
+		else if (m instanceof Req) {
+			Req mReq = (Req) m;
+			
+			retList.addAll(fv(mReq.getReq()));
+			
+			for (EncValue v: mReq.getArgs()) {
+				retList.addAll(fv(v));
+			}
+			
+			return retList;
+		}
+		else if (m instanceof App) {
+			App mApp = (App) m;
+			
+			retList.addAll(fv(mApp.getFun()));
+			
+			for (EncValue v: mApp.getArgs()) {
+				retList.addAll(fv(v));
+			}
+			
+			return retList;
+		}
+		else if (m instanceof Let) {
+			Let mLet = (Let) m;
+			
+			retList.addAll(fv(mLet.getM2()));
+			retList.remove(mLet.getVal());
+			retList.addAll(fv(mLet.getM1()));
+			
+			return retList;
+		}
+		else
+			return null;
+	}
 }

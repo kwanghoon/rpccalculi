@@ -104,5 +104,77 @@ public class RPCStaMain {
 		
 		return staTerm;
 	}
+	
+	public static ArrayList<String> fv(StaTerm m) {
+		ArrayList<String> retList = new ArrayList<>();
+		
+		if (m instanceof Const) {
+			return retList;
+		}
+		else if (m instanceof Var) {
+			Var mVar = (Var) m;
+			
+			retList.add(mVar.getX());
+			
+			return retList;
+		}
+		else if (m instanceof Lam) {
+			Lam mLam = (Lam) m;
+			
+			retList.addAll(fv(mLam.getM()));
+			retList.removeAll(mLam.getXs());
+			
+			return retList;
+		}
+		else if (m instanceof Call) {
+			Call mCall = (Call) m;
+			
+			retList.addAll(fv(mCall.getF()));
+			
+			for (StaValue v: mCall.getWs()) {
+				retList.addAll(fv(v));
+			}
+			
+			return retList;
+		}
+		else if (m instanceof Ret) {
+			Ret mRet = (Ret) m;
+			
+			return fv(mRet.getW());
+		}
+		else if (m instanceof Req) {
+			Req mReq = (Req) m;
+			
+			retList.addAll(fv(mReq.getF()));
+			
+			for (StaValue v: mReq.getWs()) {
+				retList.addAll(fv(v));
+			}
+			
+			return retList;
+		}
+		else if (m instanceof App) {
+			App mApp = (App) m;
+			
+			retList.addAll(fv(mApp.getF()));
+			
+			for (StaValue v: mApp.getWs()) {
+				retList.addAll(fv(v));
+			}
+			
+			return retList;
+		}
+		else if (m instanceof Let) {
+			Let mLet = (Let) m;
+			
+			retList.addAll(fv(mLet.getM2()));
+			retList.remove(mLet.getY());
+			retList.addAll(fv(mLet.getM1()));
+			
+			return retList;
+		}
+		else
+			return null;
+	}
 
 }

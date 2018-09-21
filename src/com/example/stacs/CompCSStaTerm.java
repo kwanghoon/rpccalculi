@@ -3,6 +3,7 @@ package com.example.stacs;
 import java.util.ArrayList;
 
 import com.example.rpc.Location;
+import com.example.starpc.RPCStaMain;
 import com.example.utils.TripleTup;
 
 import javafx.util.Pair;
@@ -44,8 +45,12 @@ public class CompCSStaTerm {
 			strs.addAll(rtLam.getXs());
 			
 			Pair<Integer, TripleTup<StaTerm, FunStore, FunStore>> p1 = comp(i, rtLam.getM(), strs);
-			ClosedFun closedFun = new ClosedFun(zs, rtLam.getLoc(), rtLam.getXs(), p1.getValue().getFirst());
+			
+			ArrayList<String> fvs = RPCStaMain.fv(rtLam);
+			ClosedFun closedFun = new ClosedFun(fvs, rtLam.getLoc(), rtLam.getXs(), p1.getValue().getFirst());
+			
 			String f = "_gf" + p1.getKey();
+			
 			FunStore clientFS = p1.getValue().getSecond();
 			FunStore serverFS = p1.getValue().getThird();
 			

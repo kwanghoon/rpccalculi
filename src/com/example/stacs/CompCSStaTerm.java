@@ -63,7 +63,7 @@ public class CompCSStaTerm {
 			
 			ArrayList<StaValue> cloVs = new ArrayList<>();
 			
-			for (String z: zs) {
+			for (String z: fvs) {
 				cloVs.add(new Var(z));
 			}
 			

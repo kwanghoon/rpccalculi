@@ -1,6 +1,8 @@
 package com.example.starpc;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import javafx.util.Pair;
 
@@ -8,7 +10,7 @@ public class RPCStaMain {
 	public static StaTerm subst(StaTerm m, String x, StaValue v) {
 		if (m instanceof Const) {
 			Const mconst = (Const) m;
-			
+
 			return mconst;
 		}
 		else if (m instanceof Var) {
@@ -72,15 +74,15 @@ public class RPCStaMain {
 		}
 		else if (m instanceof Let) {
 			Let mlet = (Let) m;
-			
+
 			StaTerm st1 = subst(mlet.getM1(), x, v);
 			StaTerm st2;
-			
+
 			if (mlet.getY().equals(x))
 				st2 = mlet.getM2();
 			else
 				st2 = subst(mlet.getM2(), x, v);
-			
+
 			return new Let(mlet.getY(), st1, st2);
 		}
 
@@ -92,85 +94,90 @@ public class RPCStaMain {
 		for (int i = 0; i < xs.size(); i++) {
 			pairList.add(new Pair<>(xs.get(i), vs.get(i)));
 		}
-		
+
 		StaTerm staTerm = m;
-		
-		for (Pair<String, StaValue> p:pairList) {
+
+		for (Pair<String, StaValue> p : pairList) {
 			String x = p.getKey();
 			StaValue v = p.getValue();
 
 			staTerm = subst(staTerm, x, v);
 		}
-		
+
 		return staTerm;
 	}
-	
+
 	public static ArrayList<String> fv(StaTerm m) {
 		ArrayList<String> retList = new ArrayList<>();
-		
+		Set<String> strSet = new HashSet<>();
+
 		if (m instanceof Const) {
 			return retList;
 		}
 		else if (m instanceof Var) {
 			Var mVar = (Var) m;
-			
+
 			retList.add(mVar.getX());
-			
+
 			return retList;
 		}
 		else if (m instanceof Lam) {
 			Lam mLam = (Lam) m;
-			
-			retList.addAll(fv(mLam.getM()));
-			retList.removeAll(mLam.getXs());
-			
+
+			strSet.addAll(fv(mLam.getM()));
+			strSet.removeAll(mLam.getXs());
+
+			retList.addAll(strSet);
+
 			return retList;
 		}
 		else if (m instanceof Call) {
 			Call mCall = (Call) m;
-			
-			retList.addAll(fv(mCall.getF()));
-			
-			for (StaValue v: mCall.getWs()) {
-				retList.addAll(fv(v));
+
+			strSet.addAll(fv(mCall.getF()));
+			for (StaValue v : mCall.getWs()) {
+				strSet.addAll(fv(v));
 			}
-			
+			retList.addAll(strSet);
+
 			return retList;
 		}
 		else if (m instanceof Ret) {
 			Ret mRet = (Ret) m;
-			
+
 			return fv(mRet.getW());
 		}
 		else if (m instanceof Req) {
 			Req mReq = (Req) m;
-			
-			retList.addAll(fv(mReq.getF()));
-			
-			for (StaValue v: mReq.getWs()) {
-				retList.addAll(fv(v));
+
+			strSet.addAll(fv(mReq.getF()));
+			for (StaValue v : mReq.getWs()) {
+				strSet.addAll(fv(v));
 			}
-			
+			retList.addAll(strSet);
+
 			return retList;
 		}
 		else if (m instanceof App) {
 			App mApp = (App) m;
-			
-			retList.addAll(fv(mApp.getF()));
-			
-			for (StaValue v: mApp.getWs()) {
-				retList.addAll(fv(v));
+
+			strSet.addAll(fv(mApp.getF()));
+			for (StaValue v : mApp.getWs()) {
+				strSet.addAll(fv(v));
 			}
-			
+			retList.addAll(strSet);
+
 			return retList;
 		}
 		else if (m instanceof Let) {
 			Let mLet = (Let) m;
-			
-			retList.addAll(fv(mLet.getM2()));
-			retList.remove(mLet.getY());
-			retList.addAll(fv(mLet.getM1()));
-			
+
+			strSet.addAll(fv(mLet.getM2()));
+			strSet.remove(mLet.getY());
+			strSet.addAll(fv(mLet.getM1()));
+
+			retList.addAll(strSet);
+
 			return retList;
 		}
 		else

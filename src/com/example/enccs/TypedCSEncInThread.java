@@ -63,6 +63,9 @@ public class TypedCSEncInThread {
 			EncTerm mainExpr = csEncTerm.getFirst();
 			FunStore clientFS = csEncTerm.getSecond();
 			FunStore serverFS = csEncTerm.getThird();
+			
+			System.out.println("Client FunStore: " + clientFS);
+			System.out.println("Server FunStore: " + serverFS);
 
 			Thread serverThread = new Thread(() -> {
 				Server server = new Server(serverFS);

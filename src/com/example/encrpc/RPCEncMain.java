@@ -1,6 +1,8 @@
 package com.example.encrpc;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import javafx.util.Pair;
 
@@ -116,6 +118,7 @@ public class RPCEncMain {
 	
 	public static ArrayList<String> fv(EncTerm m) {
 		ArrayList<String> retList = new ArrayList<>();
+		Set<String> strSet = new HashSet<>();
 		
 		if (m instanceof Const) {
 			return retList;
@@ -130,51 +133,60 @@ public class RPCEncMain {
 		else if (m instanceof Lam) {
 			Lam mLam = (Lam) m;
 			
-			// addAll 자체가 union을 위해 존재
-			retList.addAll(fv(mLam.getTerm()));			// fv mbody
-			retList.removeAll(mLam.getStrArr());		// (fv mbody) \\ xs
+			strSet.addAll(fv(mLam.getTerm()));
+			strSet.removeAll(mLam.getStrArr());
+			
+			retList.addAll(strSet);
 			
 			return retList;
 		}
 		else if (m instanceof Call) {
 			Call mCall = (Call) m;
 			
-			retList.addAll(fv(mCall.getCall()));
+			strSet.addAll(fv(mCall.getCall()));
 			
 			for (EncValue v: mCall.getArgs()) {
-				retList.addAll(fv(v));
+				strSet.addAll(fv(v));
 			}
+			
+			retList.addAll(strSet);
 			
 			return retList;
 		}
 		else if (m instanceof Req) {
 			Req mReq = (Req) m;
 			
-			retList.addAll(fv(mReq.getReq()));
+			strSet.addAll(fv(mReq.getReq()));
 			
 			for (EncValue v: mReq.getArgs()) {
-				retList.addAll(fv(v));
+				strSet.addAll(fv(v));
 			}
+			
+			retList.addAll(strSet);
 			
 			return retList;
 		}
 		else if (m instanceof App) {
 			App mApp = (App) m;
 			
-			retList.addAll(fv(mApp.getFun()));
+			strSet.addAll(fv(mApp.getFun()));
 			
 			for (EncValue v: mApp.getArgs()) {
-				retList.addAll(fv(v));
+				strSet.addAll(fv(v));
 			}
+			
+			retList.addAll(strSet);
 			
 			return retList;
 		}
 		else if (m instanceof Let) {
 			Let mLet = (Let) m;
 			
-			retList.addAll(fv(mLet.getM2()));
-			retList.remove(mLet.getVal());
-			retList.addAll(fv(mLet.getM1()));
+			strSet.addAll(fv(mLet.getM2()));
+			strSet.remove(mLet.getVal());
+			strSet.addAll(fv(mLet.getM1()));
+			
+			retList.addAll(strSet);
 			
 			return retList;
 		}

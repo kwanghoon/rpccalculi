@@ -61,7 +61,7 @@ public class CompCSEncTerm {
 			
 			ArrayList<EncValue> cloVs = new ArrayList<>();
 			
-			for (String z: zs) {
+			for (String z: fvs) {
 				cloVs.add(new Var(z));
 			}
 			

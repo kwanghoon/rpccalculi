@@ -175,21 +175,3 @@ public class TypedCSEnc {
 		return null;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

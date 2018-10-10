@@ -64,8 +64,13 @@ public class TypedCSEncInThread {
 			FunStore clientFS = csEncTerm.getSecond();
 			FunStore serverFS = csEncTerm.getThird();
 			
-			System.out.println("Client FunStore: " + clientFS);
-			System.out.println("Server FunStore: " + serverFS);
+			System.out.println("typed rpc program: " + typedRpcProgram);
+			System.out.println("encoding rpc term: " + encTerm);
+			System.out.println("main program: " + mainExpr);
+			System.out.println("");
+			
+			System.out.println("Client FunStore: \n" + clientFS);
+			System.out.println("Server FunStore: \n" + serverFS);
 
 			Thread serverThread = new Thread(() -> {
 				Server server = new Server(serverFS);

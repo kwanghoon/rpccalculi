@@ -40,12 +40,13 @@ public class CompCSEncTerm {
 			
 			ArrayList<String> strs = new ArrayList<>();
 			strs.addAll(zs);
-			strs.addAll(ttLam.getStrArr());
+			strs.addAll(ttLam.getXs());
 			
-			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p1 = comp(i, ttLam.getTerm(), strs);
+			com.example.encrpc.EncTerm lamM = ttLam.getM();
+			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p1 = comp(i, lamM, strs);
 			
 			ArrayList<String> fvs = RPCEncMain.fv(ttLam);
-			ClosedFun closedFun = new ClosedFun(fvs, ttLam.getLoc(), ttLam.getStrArr(), p1.getValue().getFirst());
+			ClosedFun closedFun = new ClosedFun(fvs, ttLam.getLoc(), ttLam.getXs(), p1.getValue().getFirst());
 			
 			String f = "_gf" + p1.getKey();
 			
@@ -72,9 +73,10 @@ public class CompCSEncTerm {
 		}
 		else if (tt instanceof com.example.encrpc.App) {
 			com.example.encrpc.App ttApp = (com.example.encrpc.App) tt;
+			ArrayList<com.example.encrpc.EncValue> ttAppArgs = (ArrayList<com.example.encrpc.EncValue>) ttApp.getArgs().clone();
 			
 			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p1 = comp(i, ttApp.getFun(), zs);
-			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), ttApp.getArgs(), zs);
+			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), ttAppArgs, zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
 			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
@@ -93,7 +95,7 @@ public class CompCSEncTerm {
 			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p1 = comp(i, ttLet.getM1(), zs);
 			
 			ArrayList<String> strArr = (ArrayList<String>) zs.clone();
-			strArr.add(ttLet.getVal());
+			strArr.add(ttLet.getY());
 			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p2 = comp(p1.getKey(), ttLet.getM2(), strArr);
 			
 			FunStore clientFS = p1.getValue().getSecond();
@@ -102,7 +104,7 @@ public class CompCSEncTerm {
 			FunStore serverFS = p1.getValue().getThird();
 			serverFS.getFs().putAll(p2.getValue().getThird().getFs());
 			
-			triple = new TripleTup<>(new Let(ttLet.getVal(), p1.getValue().getFirst(), p2.getValue().getFirst()), clientFS, serverFS);
+			triple = new TripleTup<>(new Let(ttLet.getY(), p1.getValue().getFirst(), p2.getValue().getFirst()), clientFS, serverFS);
 			pair = new Pair<>(p2.getKey(), triple);
 
 			return pair;
@@ -110,8 +112,8 @@ public class CompCSEncTerm {
 		else if (tt instanceof com.example.encrpc.Req) {
 			com.example.encrpc.Req ttReq = (com.example.encrpc.Req) tt;
 			
-			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p1 = comp(i, ttReq.getReq(), zs);
-			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), ttReq.getArgs(), zs);
+			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p1 = comp(i, ttReq.getV(), zs);
+			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), ttReq.getWs(), zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
 			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
@@ -127,8 +129,8 @@ public class CompCSEncTerm {
 		else if (tt instanceof com.example.encrpc.Call) {
 			com.example.encrpc.Call ttCall = (com.example.encrpc.Call) tt;
 			
-			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p1 = comp(i, ttCall.getCall(), zs);
-			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), ttCall.getArgs(), zs);
+			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p1 = comp(i, ttCall.getV(), zs);
+			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), ttCall.getWs(), zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
 			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());

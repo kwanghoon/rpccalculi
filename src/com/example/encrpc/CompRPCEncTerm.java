@@ -53,7 +53,7 @@ public class CompRPCEncTerm {
 
 				retPair = new Pair<>(p.getKey(), new Lam(Location.Server, lamXs, p.getValue()));
 			}
-
+			
 			return retPair;
 		}
 		else if (tt instanceof com.example.typedrpc.App) {

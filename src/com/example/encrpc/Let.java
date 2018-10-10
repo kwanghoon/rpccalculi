@@ -1,23 +1,23 @@
 package com.example.encrpc;
 
 public class Let extends EncTerm {
-	private String val;
+	private String y;
 	private EncTerm m1;
 	private EncTerm m2;
 
-	public Let(String val, EncTerm m1, EncTerm m2) {
+	public Let(String y, EncTerm m1, EncTerm m2) {
 		super();
-		this.val = val;
+		this.y = y;
 		this.m1 = m1;
 		this.m2 = m2;
 	}
 
-	public String getVal() {
-		return val;
+	public String getY() {
+		return y;
 	}
 
-	public void setVal(String val) {
-		this.val = val;
+	public void setY(String y) {
+		this.y = y;
 	}
 
 	public EncTerm getM1() {
@@ -40,7 +40,7 @@ public class Let extends EncTerm {
 	public String toString() {
 		String ret = "let ";
 
-		ret += val + " = ";
+		ret += y + " = ";
 		ret += m1.toString() + " in ";
 		ret += m2.toString();
 

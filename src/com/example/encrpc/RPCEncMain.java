@@ -1,6 +1,8 @@
 package com.example.encrpc;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import javafx.util.Pair;
 
@@ -22,20 +24,20 @@ public class RPCEncMain {
 		else if (m instanceof Lam) {
 			Lam mLam = (Lam) m;
 			
-			if (mLam.getStrArr().contains(x)) {
-				return new Lam(mLam.getLoc(), mLam.getStrArr(), mLam.getTerm());
+			if (mLam.getXs().contains(x)) {
+				return new Lam(mLam.getLoc(), mLam.getXs(), mLam.getM());
 			}
 			else {
-				return new Lam(mLam.getLoc(), mLam.getStrArr(), subst(mLam.getTerm(), x, v));
+				return new Lam(mLam.getLoc(), mLam.getXs(), subst(mLam.getM(), x, v));
 			}
 		}
 		else if (m instanceof Call) {
 			Call mCall = (Call) m;
 
-			EncTerm call = subst(mCall.getCall(), x, v);
+			EncTerm call = subst(mCall.getV(), x, v);
 			ArrayList<EncValue> args = new ArrayList<>();
 
-			for (EncValue ev : mCall.getArgs()) {
+			for (EncValue ev : mCall.getWs()) {
 				EncTerm arg = subst(ev, x, v);
 				if (arg instanceof EncValue)
 					args.add((EncValue) arg);
@@ -64,10 +66,10 @@ public class RPCEncMain {
 		else if (m instanceof Req) {
 			Req mReq = (Req) m;
 
-			EncTerm req = subst(mReq.getReq(), x, v);
+			EncTerm req = subst(mReq.getV(), x, v);
 			ArrayList<EncValue> args = new ArrayList<>();
 
-			for (EncValue ev : mReq.getArgs()) {
+			for (EncValue ev : mReq.getWs()) {
 				EncTerm arg = subst(ev, x, v);
 
 				if (arg instanceof EncValue)
@@ -83,12 +85,12 @@ public class RPCEncMain {
 			EncTerm m1 = subst(mLet.getM1(), x, v);
 			EncTerm m2;
 
-			if (mLet.getVal().equals(x))
+			if (mLet.getY().equals(x))
 				m2 = mLet.getM2();
 			else
 				m2 = subst(mLet.getM2(), x, v);
 
-			Let retLet = new Let(mLet.getVal(), m1, m2);
+			Let retLet = new Let(mLet.getY(), m1, m2);
 
 			return retLet;
 		}
@@ -112,5 +114,86 @@ public class RPCEncMain {
 		}
 		
 		return encTerm;
+	}
+	
+	public static ArrayList<String> fv(EncTerm m) {
+		ArrayList<String> retList = new ArrayList<>();
+		Set<String> strSet = new HashSet<>();
+		
+		if (m instanceof Const) {
+			return retList;
+		}
+		else if (m instanceof Var) {
+			Var mVar = (Var) m;
+			
+			retList.add(mVar.getX());
+			
+			return retList;
+		}
+		else if (m instanceof Lam) {
+			Lam mLam = (Lam) m;
+			
+			strSet.addAll(fv(mLam.getM()));
+			strSet.removeAll(mLam.getXs());
+
+			retList.addAll(strSet);
+			
+			return retList;
+		}
+		else if (m instanceof Call) {
+			Call mCall = (Call) m;
+			
+			strSet.addAll(fv(mCall.getV()));
+			
+			for (EncValue v: mCall.getWs()) {
+				ArrayList<String> retFvs = fv(v);
+				strSet.addAll(retFvs);
+			}
+			
+			retList.addAll(strSet);
+			
+			return retList;
+		}
+		else if (m instanceof Req) {
+			Req mReq = (Req) m;
+			
+			strSet.addAll(fv(mReq.getV()));
+			
+			for (EncValue v: mReq.getWs()) {
+				ArrayList<String> retFvs = fv(v);
+				strSet.addAll(retFvs);
+			}
+			
+			retList.addAll(strSet);
+			
+			return retList;
+		}
+		else if (m instanceof App) {
+			App mApp = (App) m;
+			
+			strSet.addAll(fv(mApp.getFun()));
+			
+			for (EncValue v: mApp.getArgs()) {
+				ArrayList<String> retFvs = fv(v);
+				strSet.addAll(retFvs);
+			}
+			
+			retList.addAll(strSet);
+			
+			return retList;
+		}
+		else if (m instanceof Let) {
+			Let mLet = (Let) m;
+			
+			strSet.addAll(fv(mLet.getM2()));
+			strSet.remove(mLet.getY());
+			strSet.addAll(fv(mLet.getM1()));
+			
+			retList.addAll(strSet);
+			
+			return retList;
+		}
+		else
+			return null;
 	}
 }

@@ -1,5 +1,9 @@
 package com.example.enccs;
 
-public class EncValue extends EncTerm {
+import org.json.simple.JSONObject;
 
+public class EncValue extends EncTerm {
+	public JSONObject toJson() {
+		return new JSONObject();
+	}
 }

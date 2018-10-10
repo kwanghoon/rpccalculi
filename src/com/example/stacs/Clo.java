@@ -33,7 +33,7 @@ public class Clo extends StaValue {
 
 	@Override
 	public String toString() {
-		String ret = "Clo(" + f + ", ";
+		String ret = "Clo(" + f + ", {";
 		int cnt = 0;
 		
 		for (StaValue v : vs) {
@@ -46,7 +46,7 @@ public class Clo extends StaValue {
 				cnt++;
 			}
 		}
-		ret += ")";
+		ret += "})";
 		
 		return ret;
 	}

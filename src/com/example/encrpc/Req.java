@@ -3,42 +3,42 @@ package com.example.encrpc;
 import java.util.ArrayList;
 
 public class Req extends EncTerm {
-	private EncValue req;
-	private ArrayList<EncValue> args;
+	private EncValue v;
+	private ArrayList<EncValue> ws;
 
-	public Req(EncValue req, ArrayList<EncValue> args) {
+	public Req(EncValue v, ArrayList<EncValue> ws) {
 		super();
-		this.req = req;
-		this.args = args;
+		this.v = v;
+		this.ws = ws;
 	}
 
-	public EncValue getReq() {
-		return req;
+	public EncValue getV() {
+		return v;
 	}
 
-	public void setReq(EncValue req) {
-		this.req = req;
+	public void setV(EncValue v) {
+		this.v = v;
 	}
 
-	public ArrayList<EncValue> getArgs() {
-		return args;
+	public ArrayList<EncValue> getWs() {
+		return ws;
 	}
 
-	public void setArgs(ArrayList<EncValue> args) {
-		this.args = args;
+	public void setWs(ArrayList<EncValue> ws) {
+		this.ws = ws;
 	}
 
 	@Override
 	public String toString() {
 		int cnt = 0;
 		String ret = "Req(";
-		ret += req.toString();
+		ret += v.toString();
 		ret += ") (";
 
-		for (EncValue ev : args) {
+		for (EncValue ev : ws) {
 			ret += ev.toString();
 			
-			if (args.size() - 1 != cnt) {
+			if (ws.size() - 1 != cnt) {
 				ret += " ";
 				cnt++;
 			}

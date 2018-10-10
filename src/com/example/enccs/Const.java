@@ -1,5 +1,7 @@
 package com.example.enccs;
 
+import org.json.simple.JSONObject;
+
 public class Const extends EncValue {
 	private int i;
 
@@ -19,5 +21,15 @@ public class Const extends EncValue {
 	@Override
 	public String toString() {
 		return i + "";
+	}
+
+	public static final String Const = "Const";
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public JSONObject toJson() {
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put(Const, new Long(i));
+		return jsonObject;
 	}
 }

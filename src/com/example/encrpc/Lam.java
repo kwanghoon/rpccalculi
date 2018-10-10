@@ -6,14 +6,14 @@ import com.example.rpc.Location;
 
 public class Lam extends EncValue {
 	private Location loc;
-	private ArrayList<String> strArr;
-	private EncTerm term;
+	private ArrayList<String> xs;
+	private EncTerm m;
 
-	public Lam(Location loc, ArrayList<String> strArr, EncTerm term) {
+	public Lam(Location loc, ArrayList<String> xs, EncTerm m) {
 		super();
 		this.loc = loc;
-		this.strArr = strArr;
-		this.term = term;
+		this.xs = xs;
+		this.m = m;
 	}
 
 	public Location getLoc() {
@@ -24,20 +24,20 @@ public class Lam extends EncValue {
 		this.loc = loc;
 	}
 
-	public ArrayList<String> getStrArr() {
-		return strArr;
+	public ArrayList<String> getXs() {
+		return xs;
 	}
 
-	public void setStrArr(ArrayList<String> strArr) {
-		this.strArr = strArr;
+	public void setXs(ArrayList<String> xs) {
+		this.xs = xs;
 	}
 
-	public EncTerm getTerm() {
-		return term;
+	public EncTerm getM() {
+		return m;
 	}
 
-	public void setTerm(EncTerm term) {
-		this.term = term;
+	public void setM(EncTerm m) {
+		this.m = m;
 	}
 
 	@Override
@@ -51,16 +51,16 @@ public class Lam extends EncValue {
 			ret += "s";
 
 		ret += "(";
-		for (String s : strArr) {
+		for (String s : xs) {
 			ret += s;
 			
-			if (strArr.size() - 1 != cnt) {
+			if (xs.size() - 1 != cnt) {
 				ret += " ";
 				cnt++;
 			}
 		}
 		ret += ").";
-		ret += term.toString();
+		ret += m.toString();
 
 		return ret;
 	}

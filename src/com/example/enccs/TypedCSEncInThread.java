@@ -35,107 +35,135 @@ public class TypedCSEncInThread {
 	private static final int PORT = 8080;
 
 	public static void main(String[] args) {
-		try {
-			Parser parser = new Parser();
+		SocketWas was = new SocketWas();
+		Thread wasThread = new Thread(() -> {
+			was.start();
+		});
+		wasThread.start();
+		while (true) {
+			try {
+				Parser parser = new Parser();
 
-			System.out.print("Enter a file name: ");
-			String fileName = new Scanner(System.in).next();
+				System.out.print("Enter a file name: ");
+				String fileName = new Scanner(System.in).next();
 
-			FileReader fileReader = new FileReader("./testcase/" + fileName);
+				FileReader fileReader = new FileReader("./testcase/" + fileName);
 
-			Scanner scan = new Scanner(fileReader);
+				Scanner scan = new Scanner(fileReader);
 
-			while (scan.hasNext()) {
-				System.out.println(scan.nextLine());
-			}
-			System.out.println();
-
-			fileReader = new FileReader("./testcase/" + fileName);
-
-			Term rpcProgram = parser.Parsing(fileReader);
-			TypedTerm typedRpcProgram = Infer.infer(rpcProgram);
-
-			com.example.encrpc.EncTerm encTerm = CompRPCEncTerm.compEncTerm(typedRpcProgram);
-
-			TripleTup<com.example.enccs.EncTerm, com.example.enccs.FunStore, com.example.enccs.FunStore> csEncTerm = CompCSEncTerm
-					.compCSEncTerm(encTerm);
-
-			EncTerm mainExpr = csEncTerm.getFirst();
-			FunStore clientFS = csEncTerm.getSecond();
-			FunStore serverFS = csEncTerm.getThird();
-			
-			System.out.println("typed rpc program: " + typedRpcProgram);
-			System.out.println("encoding rpc term: " + encTerm);
-			System.out.println("main program: " + mainExpr);
-			System.out.println("");
-			
-			System.out.println("Client FunStore: \n" + clientFS);
-			System.out.println("Server FunStore: \n" + serverFS);
-
-			Thread serverThread = new Thread(() -> {
-				Server server = new Server(serverFS);
-				server.start();
-			});
-
-			Thread clientThread = new Thread(() -> {
-				InetAddress localAddr;
-				try {
-					localAddr = InetAddress.getLocalHost();
-					Client client = new Client(localAddr, clientFS);
-					EncValue result = client.start(mainExpr);
-					System.out.println("Result: " + result);
-				} catch (UnknownHostException e) {
-					e.printStackTrace();
+				while (scan.hasNext()) {
+					System.out.println(scan.nextLine());
 				}
-			});
+				System.out.println();
 
-			serverThread.start();
-			clientThread.start();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (LexerException e) {
-			e.printStackTrace();
-		} catch (ParserException e) {
-			e.printStackTrace();
+				fileReader = new FileReader("./testcase/" + fileName);
+
+				Term rpcProgram = parser.Parsing(fileReader);
+				TypedTerm typedRpcProgram = Infer.infer(rpcProgram);
+
+				com.example.encrpc.EncTerm encTerm = CompRPCEncTerm.compEncTerm(typedRpcProgram);
+
+				TripleTup<com.example.enccs.EncTerm, com.example.enccs.FunStore, com.example.enccs.FunStore> csEncTerm = CompCSEncTerm
+						.compCSEncTerm(encTerm);
+
+				EncTerm mainExpr = csEncTerm.getFirst();
+				FunStore clientFS = csEncTerm.getSecond();
+				FunStore serverFS = csEncTerm.getThird();
+
+				System.out.println("Client FunStore: \n" + clientFS);
+				System.out.println("Server FunStore: \n" + serverFS);
+
+				was.setServerFS(serverFS);
+
+				Thread clientThread = new Thread(() -> {
+					InetAddress localAddr;
+					try {
+						localAddr = InetAddress.getLocalHost();
+						Client client = new Client(localAddr, clientFS);
+						EncValue result = client.start(mainExpr);
+						System.out.println("Result: " + result);
+					}
+					catch (UnknownHostException e) {
+						e.printStackTrace();
+					}
+				});
+
+				clientThread.start();
+				clientThread.join();
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+			catch (LexerException e) {
+				e.printStackTrace();
+			}
+			catch (ParserException e) {
+				e.printStackTrace();
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 
+	}
+
+	public static class SocketWas {
+		private FunStore phi;
+
+		public SocketWas() {
+
+		}
+
+		public void setServerFS(FunStore phi) {
+			this.phi = phi;
+		}
+
+		public void start() {
+			try (ServerSocket servSock = new ServerSocket(PORT)) {
+				while (true) {
+					Socket client = servSock.accept();
+					BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
+					PrintWriter writer = new PrintWriter(client.getOutputStream(), true);
+
+					Server server = new Server(phi, client, reader, writer);
+
+					Thread th = new Thread(() -> {
+						server.start();
+					});
+
+					th.start();
+				}
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static class Server {
 		private FunStore phi;
 
 		private JSONParser jsonParser;
-		private ServerSocket serverSock;
+
+		private Socket client;
 		private BufferedReader input;
 		private PrintWriter output;
 
-		public Server(FunStore phi) {
+		public Server(FunStore phi, Socket client, BufferedReader input, PrintWriter output) {
 			this.phi = phi;
+			this.client = client;
+			this.input = input;
+			this.output = output;
 
 			jsonParser = new JSONParser();
 		}
 
 		public void start() {
-			try {
-				serverSock = new ServerSocket(PORT);
-
-				// WAS와 비슷한 역할을 하는 부분
-				while (true) {
-					handleClient();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			handleClient();
 		}
 
 		private void handleClient() {
-			Socket client;
-
 			try {
-				client = serverSock.accept();
-				input = new BufferedReader(new InputStreamReader(client.getInputStream()));
-				output = new PrintWriter(new OutputStreamWriter(client.getOutputStream()), true);
-
 				String protocol = input.readLine();
 
 				if (REQ.equals(protocol)) {
@@ -158,13 +186,16 @@ public class TypedCSEncInThread {
 					EncTerm reqTerm = new App(cloFn, args);
 
 					evalServer(reqTerm);
-				} else {
+				}
+				else {
 					System.err.println("Not expected: " + protocol);
 				}
 
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				e.printStackTrace();
-			} catch (ParseException e) {
+			}
+			catch (ParseException e) {
 				e.printStackTrace();
 			}
 		}
@@ -183,7 +214,8 @@ public class TypedCSEncInThread {
 						m = CSEncMain.substs(CSEncMain.substs(closedFun.getM(), closedFun.getZs(), funClo.getVs()),
 								closedFun.getXs(), mApp.getArgs());
 					}
-				} else if (m instanceof Call) {
+				}
+				else if (m instanceof Call) {
 					Call mCall = (Call) m;
 
 					if (mCall.getCall() instanceof Clo) {
@@ -199,14 +231,16 @@ public class TypedCSEncInThread {
 					}
 
 					return;
-				} else if (m instanceof Clo) {
+				}
+				else if (m instanceof Clo) {
 					Clo mClo = (Clo) m;
 
 					output.println(REPLY);
 					output.println(mClo.toJson());
 
 					return;
-				} else if (m instanceof Const) {
+				}
+				else if (m instanceof Const) {
 					Const mConst = (Const) m;
 
 					output.println(REPLY);
@@ -259,7 +293,8 @@ public class TypedCSEncInThread {
 					server = new Socket(serverAddr, PORT);
 					input = new BufferedReader(new InputStreamReader(server.getInputStream()));
 					output = new PrintWriter(new OutputStreamWriter(server.getOutputStream()), true);
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -267,7 +302,8 @@ public class TypedCSEncInThread {
 			public void disconnect() {
 				try {
 					server.close();
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -290,7 +326,8 @@ public class TypedCSEncInThread {
 						EncValue replyVal = JSonUtil.fromJson(replyValInJson);
 
 						retm = new Let(mLet.getVal(), replyVal, mLet.getM2());
-					} else if (CALL.equals(protocol)) {
+					}
+					else if (CALL.equals(protocol)) {
 						String cloInStr = conn.input().readLine(); // clo in Json (CALL clo n arg1 arg2 ... argn
 
 						String nInStr = conn.input().readLine();
@@ -313,14 +350,17 @@ public class TypedCSEncInThread {
 						}
 
 						retm = new Let(mLet.getVal(), new App(clo, args), mLet.getM2());
-					} else {
+					}
+					else {
 						System.err.println("receiver: Neither REPLY or CALL: " + protocol);
 						retm = null;
 					}
-				} catch (ParseException exn) {
+				}
+				catch (ParseException exn) {
 					exn.printStackTrace();
 					retm = null;
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 					retm = null;
 				}
@@ -349,7 +389,8 @@ public class TypedCSEncInThread {
 											closedFun.getXs(), mApp1.getArgs()),
 									mLet.getM2());
 						}
-					} else if (m1 instanceof Req) {
+					}
+					else if (m1 instanceof Req) {
 						Req mReq1 = (Req) m1;
 
 						if (mReq1.getReq() instanceof Clo) {
@@ -366,20 +407,24 @@ public class TypedCSEncInThread {
 
 							m = receiver.apply(mLet);
 						}
-					} else if (m1 instanceof Let) {
+					}
+					else if (m1 instanceof Let) {
 						Let mLet1 = (Let) m1;
 
 						m = new Let(mLet1.getVal(), mLet1.getM1(), new Let(mLet.getVal(), mLet1.getM2(), mLet.getM2()));
-					} else if (m1 instanceof Clo) {
+					}
+					else if (m1 instanceof Clo) {
 						Clo mClo1 = (Clo) m1;
 
 						m = CSEncMain.subst(mLet.getM2(), mLet.getVal(), mClo1);
-					} else if (m1 instanceof Const) {
+					}
+					else if (m1 instanceof Const) {
 						Const mConst1 = (Const) m1;
 
 						m = CSEncMain.subst(mLet.getM2(), mLet.getVal(), mConst1);
 					}
-				} else if (m instanceof Clo || m instanceof Const) {
+				}
+				else if (m instanceof Clo || m instanceof Const) {
 					return (EncValue) m;
 				}
 			}

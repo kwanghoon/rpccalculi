@@ -34,75 +34,85 @@ public class TypedCSStaInThread {
 	private static final int PORT = 7777;
 
 	public static void main(String[] args) {
-		try {
-			Parser parser = new Parser();
 
-			System.out.println("Enter a file name: ");
+		SocketWas was = new SocketWas();
+		Thread was_thread = new Thread(() -> {
+			was.start();
+		});
 
-			String fileName = new Scanner(System.in).next();
+		was_thread.start();
+		while (true) {
+			try {
+				Parser parser = new Parser();
 
-			FileReader fileReader = new FileReader("./testcase/" + fileName);
-			System.out.println("./testcase/" + fileName);
+				System.out.print("Enter a file name: ");
 
-			Scanner scan = new Scanner(fileReader);
-			while (scan.hasNext()) {
-				System.out.println(scan.nextLine());
-			}
-			System.out.println();
+				String fileName = new Scanner(System.in).next();
 
-			fileReader = new FileReader("./testcase/" + fileName);
+				FileReader fileReader = new FileReader("./testcase/" + fileName);
+				System.out.println("./testcase/" + fileName);
 
-			Term rpc_program = parser.Parsing(fileReader);
-
-			com.example.typedrpc.TypedTerm typed_rpc_program = Infer.infer(rpc_program);
-
-			com.example.starpc.StaTerm staTerm = CompRPCStaTerm.compStaTerm(typed_rpc_program);
-
-			TripleTup<com.example.stacs.StaTerm, com.example.stacs.FunStore, com.example.stacs.FunStore> csStaTerm = CompCSStaTerm
-					.compCSStaTerm(staTerm);
-
-			FunStore clientFS = csStaTerm.getSecond();
-			FunStore serverFS = csStaTerm.getThird();
-			StaTerm main_expr = csStaTerm.getFirst();
-
-			System.out.println("Main expression:");
-			System.out.println(main_expr);
-			System.out.println();
-
-			System.out.println("Client Functions:");
-			System.out.println(clientFS);
-
-			System.out.println("Server Functions:");
-			System.out.println(serverFS);
-			
-			Thread was_thread = new Thread(() -> {
-				SocketWas was = new SocketWas();
-				was.setServerFS(serverFS);
-				was.start();
-			});
-			
-			was_thread.start();
-
-			Thread client_thread = new Thread(() -> {
-				Client client;
-				try {
-					InetAddress localAddr = InetAddress.getLocalHost();
-					client = new Client(localAddr, clientFS);
-					StaValue v = client.start(main_expr);
-					System.out.println("Result: " + v);
-				} catch (UnknownHostException e) {
-					e.printStackTrace();
+				Scanner scan = new Scanner(fileReader);
+				while (scan.hasNext()) {
+					System.out.println(scan.nextLine());
 				}
-			});
+				System.out.println();
 
-			client_thread.start();
+				fileReader = new FileReader("./testcase/" + fileName);
 
-		} catch (ParserException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (LexerException e) {
-			e.printStackTrace();
+				Term rpc_program = parser.Parsing(fileReader);
+
+				com.example.typedrpc.TypedTerm typed_rpc_program = Infer.infer(rpc_program);
+
+				com.example.starpc.StaTerm staTerm = CompRPCStaTerm.compStaTerm(typed_rpc_program);
+
+				TripleTup<com.example.stacs.StaTerm, com.example.stacs.FunStore, com.example.stacs.FunStore> csStaTerm = CompCSStaTerm
+						.compCSStaTerm(staTerm);
+
+				FunStore clientFS = csStaTerm.getSecond();
+				FunStore serverFS = csStaTerm.getThird();
+				StaTerm main_expr = csStaTerm.getFirst();
+
+				System.out.println("Main expression:");
+				System.out.println(main_expr);
+				System.out.println();
+
+				System.out.println("Client Functions:");
+				System.out.println(clientFS);
+
+				System.out.println("Server Functions:");
+				System.out.println(serverFS);
+
+				was.setServerFS(serverFS);
+
+				Thread client_thread = new Thread(() -> {
+					Client client;
+					try {
+						InetAddress localAddr = InetAddress.getLocalHost();
+						client = new Client(localAddr, clientFS);
+						StaValue v = client.start(main_expr);
+						System.out.println("Result: " + v);
+					}
+					catch (UnknownHostException e) {
+						e.printStackTrace();
+					}
+				});
+
+				client_thread.start();
+				client_thread.join();
+			}
+			catch (ParserException e) {
+				e.printStackTrace();
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+			catch (LexerException e) {
+				e.printStackTrace();
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -133,7 +143,8 @@ public class TypedCSStaInThread {
 
 					th.start();
 				}
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -199,13 +210,15 @@ public class TypedCSStaInThread {
 
 						// After evalServer is terminated,
 						// it waits to receive a new request from clients.
-					} else {
+					}
+					else {
 						// Must not reach here.
 						System.err.println("No REQ. Unexpected " + line);
 					}
 				}
 
-			} catch (ParseException e) {
+			}
+			catch (ParseException e) {
 				// jsonParser.parse()
 			}
 		}
@@ -235,7 +248,8 @@ public class TypedCSStaInThread {
 
 							m = let;
 						}
-					} else if (m1 instanceof Call) {
+					}
+					else if (m1 instanceof Call) {
 						Call mCall1 = (Call) m1;
 
 						if (mCall1.getF() instanceof Clo) {
@@ -266,7 +280,8 @@ public class TypedCSStaInThread {
 
 									m = new Let(mLet.getY(), retVal, mLet.getM2());
 									break;
-								} else if (REQ.equals(line)) {
+								}
+								else if (REQ.equals(line)) {
 									String cloFnInStr = input.nextLine();
 									JSONObject cloFnInJson = (JSONObject) jsonParser.parse(cloFnInStr);
 									StaValue cloFn = JSonUtil.fromJson(cloFnInJson);
@@ -292,22 +307,26 @@ public class TypedCSStaInThread {
 
 									// After evalServer is terminated,
 									// it waits to receive a new request from clients.
-								} else {
+								}
+								else {
 									System.err.println("evalServer(Call) Must not reach here.");
 								}
 							}
 						}
-					} else if (m1 instanceof Clo) {
+					}
+					else if (m1 instanceof Clo) {
 						Clo mClo1 = (Clo) m1;
 
 						StaTerm st = CSStaMain.subst(mLet.getM2(), mLet.getY(), mClo1);
 						m = st;
-					} else if (m1 instanceof Const) {
+					}
+					else if (m1 instanceof Const) {
 						Const mConst1 = (Const) m1;
 
 						StaTerm st = CSStaMain.subst(mLet.getM2(), mLet.getY(), mConst1);
 						m = st;
-					} else if (m1 instanceof Let) {
+					}
+					else if (m1 instanceof Let) {
 						Let mLet1 = (Let) m1;
 
 						Let let = new Let(mLet1.getY(), mLet1.getM1(),
@@ -315,26 +334,28 @@ public class TypedCSStaInThread {
 						m = let;
 					}
 
-				} else if (m instanceof Clo) {
+				}
+				else if (m instanceof Clo) {
 					Clo mClo = (Clo) m;
 
 					output.println(REPLY);
 					output.println(mClo.toJson());
 
-//					// Protocols:
-//					//  - If the server context is empty then stop serverEval().
-//					//  - Otherwise, wait to receive Req or Ret.
+					// // Protocols:
+					// // - If the server context is empty then stop serverEval().
+					// // - Otherwise, wait to receive Req or Ret.
 
 					return;
 
-				} else if (m instanceof Const) {
+				}
+				else if (m instanceof Const) {
 					Const mConst = (Const) m;
 
 					output.println(REPLY);
 					output.println(mConst.toJson());
 
-//					// Protocols:
-//					//  - The same as above.
+					// // Protocols:
+					// // - The same as above.
 
 					return;
 				}
@@ -384,9 +405,11 @@ public class TypedCSStaInThread {
 					server = new Socket(serverAddress, PORT);
 					input = new Scanner(server.getInputStream());
 					output = new PrintWriter(server.getOutputStream(), true);
-				} catch (UnknownHostException e) {
+				}
+				catch (UnknownHostException e) {
 					// InetAddress.getLocalHost()
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -412,7 +435,8 @@ public class TypedCSStaInThread {
 						StaValue replyVal = JSonUtil.fromJson(replyValInJson);
 
 						retm = new Let(mLet.getY(), replyVal, mLet.getM2());
-					} else if (CALL.equals(line)) {
+					}
+					else if (CALL.equals(line)) {
 						String cloInStr = srvConn.input().nextLine(); // clo in Json (CALL clo n arg1 arg2 ... argn
 
 						String nInStr = srvConn.input().nextLine();
@@ -435,12 +459,14 @@ public class TypedCSStaInThread {
 						}
 
 						retm = new Let(mLet.getY(), new App(clo, args), mLet.getM2());
-					} else {
+					}
+					else {
 						// Must not reach here!!
 						System.err.println("receiver: Neither REPLY or CALL: " + line);
 						retm = null;
 					}
-				} catch (ParseException exn) {
+				}
+				catch (ParseException exn) {
 					exn.printStackTrace();
 					retm = null;
 				}
@@ -468,7 +494,8 @@ public class TypedCSStaInThread {
 											closedFun.getXs(), mApp1.getWs()),
 									mLet.getM2());
 						}
-					} else if (m1 instanceof Req) {
+					}
+					else if (m1 instanceof Req) {
 						Req mReq1 = (Req) m1;
 
 						if (mReq1.getF() instanceof Clo) {
@@ -484,22 +511,26 @@ public class TypedCSStaInThread {
 
 							m = receiver.apply(mLet);
 						}
-					} else if (m1 instanceof Clo) {
+					}
+					else if (m1 instanceof Clo) {
 						Clo mClo1 = (Clo) m1;
 
 						m = CSStaMain.subst(mLet.getM2(), mLet.getY(), mClo1);
-					} else if (m1 instanceof Const) {
+					}
+					else if (m1 instanceof Const) {
 						Const mConst1 = (Const) m1;
 
 						m = CSStaMain.subst(mLet.getM2(), mLet.getY(), mConst1);
-					} else if (m1 instanceof Let) {
+					}
+					else if (m1 instanceof Let) {
 						Let mLet1 = (Let) m1;
 
 						Let let = new Let(mLet1.getY(), mLet1.getM1(),
 								new Let(mLet.getY(), mLet1.getM2(), mLet.getM2()));
 
 						m = let;
-					} else if (m1 instanceof Ret) {
+					}
+					else if (m1 instanceof Ret) {
 						Ret mRet1 = (Ret) m1;
 
 						StaValue retVal = mRet1.getW();
@@ -508,9 +539,11 @@ public class TypedCSStaInThread {
 
 						m = receiver.apply(mLet);
 					}
-				} else if (m instanceof Clo || m instanceof Const) {
+				}
+				else if (m instanceof Clo || m instanceof Const) {
 					return (StaValue) m;
-				} else {
+				}
+				else {
 					System.err.println("TypedCSStaInThread.evalClient: Must not reach here");
 				}
 			}

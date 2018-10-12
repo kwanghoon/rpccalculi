@@ -76,7 +76,7 @@ public class CompCSEncTerm {
 			ArrayList<com.example.encrpc.EncValue> ttAppArgs = (ArrayList<com.example.encrpc.EncValue>) ttApp.getArgs().clone();
 			
 			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p1 = comp(i, ttApp.getFun(), zs);
-			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), ttAppArgs, zs);
+			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), 0, ttAppArgs, zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
 			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
@@ -113,7 +113,7 @@ public class CompCSEncTerm {
 			com.example.encrpc.Req ttReq = (com.example.encrpc.Req) tt;
 			
 			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p1 = comp(i, ttReq.getV(), zs);
-			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), ttReq.getWs(), zs);
+			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), 0, ttReq.getWs(), zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
 			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
@@ -130,7 +130,7 @@ public class CompCSEncTerm {
 			com.example.encrpc.Call ttCall = (com.example.encrpc.Call) tt;
 			
 			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p1 = comp(i, ttCall.getV(), zs);
-			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), ttCall.getWs(), zs);
+			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), 0, ttCall.getWs(), zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
 			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
@@ -146,21 +146,20 @@ public class CompCSEncTerm {
 		return null;
 	}
 	
-	public static Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> compList(int i, ArrayList<com.example.encrpc.EncValue> ms, ArrayList<String> zs) {
+	public static Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> compList(int i, int idx, ArrayList<com.example.encrpc.EncValue> ms, ArrayList<String> zs) {
 		TripleTup<ArrayList<EncValue>, FunStore, FunStore> triple;
 		Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> pair;
 		
-		if (ms.isEmpty()) {
+		if (idx == ms.size()) {
 			triple = new TripleTup<>(new ArrayList<EncValue>(), new FunStore(), new FunStore());
 			pair = new Pair<>(i, triple);
 			
 			return pair;
 		}
 		else {
-			com.example.encrpc.EncTerm m = ms.get(0);
-			ms.remove(m);
+			com.example.encrpc.EncTerm m = ms.get(idx);
 			
-			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p1 = compList(i, ms, zs);
+			Pair<Integer, TripleTup<ArrayList<EncValue>, FunStore, FunStore>> p1 = compList(i, idx + 1, ms, zs);
 			Pair<Integer, TripleTup<EncTerm, FunStore, FunStore>> p2 = comp(p1.getKey(), m, zs);
 			
 			ArrayList<EncValue> svArr = new ArrayList<>();

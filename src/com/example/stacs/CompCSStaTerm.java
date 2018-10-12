@@ -74,10 +74,11 @@ public class CompCSStaTerm {
 		}
 		else if (rt instanceof com.example.starpc.App) {
 			com.example.starpc.App rtApp = (com.example.starpc.App) rt;
+			ArrayList<com.example.starpc.StaValue> rtAppArgs = (ArrayList<com.example.starpc.StaValue>) rtApp.getWs().clone();
 			
 			Pair<Integer, TripleTup<StaTerm, FunStore, FunStore>> p1 = comp(i, rtApp.getF(), zs);
-			Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), rtApp.getWs(), zs);
-			
+			Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), 0, rtAppArgs, zs);
+
 			FunStore clientFS = p1.getValue().getSecond();
 			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
 			
@@ -113,7 +114,7 @@ public class CompCSStaTerm {
 			com.example.starpc.Req rtReq = (com.example.starpc.Req) rt;
 			
 			Pair<Integer, TripleTup<StaTerm, FunStore, FunStore>> p1 = comp(i, rtReq.getF(), zs);
-			Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), rtReq.getWs(), zs);
+			Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), 0, rtReq.getWs(), zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
 			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
@@ -130,7 +131,7 @@ public class CompCSStaTerm {
 			com.example.starpc.Call rtCall = (com.example.starpc.Call) rt;
 			
 			Pair<Integer, TripleTup<StaTerm, FunStore, FunStore>> p1 = comp(i, rtCall.getF(), zs);
-			Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), rtCall.getWs(), zs);
+			Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> p2 = compList(p1.getKey(), 0, rtCall.getWs(), zs);
 			
 			FunStore clientFS = p1.getValue().getSecond();
 			clientFS.getFs().putAll(p2.getValue().getSecond().getFs());
@@ -157,21 +158,20 @@ public class CompCSStaTerm {
 		return null;
 	}
 	
-	public static Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> compList(int i, ArrayList<com.example.starpc.StaValue> ms, ArrayList<String> zs) {
+	public static Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> compList(int i, int idx, ArrayList<com.example.starpc.StaValue> ms, ArrayList<String> zs) {
 		TripleTup<ArrayList<StaValue>, FunStore, FunStore> triple;
 		Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> pair;
 		
-		if (ms.isEmpty()) {
+		if (idx == ms.size()) {
 			triple = new TripleTup<>(new ArrayList<StaValue>(), new FunStore(), new FunStore());
 			pair = new Pair<>(i, triple);
 			
 			return pair;
 		}
 		else {
-			com.example.starpc.StaTerm m = ms.get(0);
-			ms.remove(m);
+			com.example.starpc.StaTerm m = ms.get(idx);
 			
-			Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> p1 = compList(i, ms, zs);
+			Pair<Integer, TripleTup<ArrayList<StaValue>, FunStore, FunStore>> p1 = compList(i, idx + 1, ms, zs);
 			Pair<Integer, TripleTup<StaTerm, FunStore, FunStore>> p2 = comp(p1.getKey(), m, zs);
 			
 			ArrayList<StaValue> svArr = new ArrayList<>();

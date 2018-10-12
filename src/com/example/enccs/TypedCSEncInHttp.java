@@ -1,9 +1,11 @@
 package com.example.enccs;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -88,13 +90,17 @@ public class TypedCSEncInHttp {
 
 				clientThread.start();
 				clientThread.join();
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				e.printStackTrace();
-			} catch (LexerException e) {
+			}
+			catch (LexerException e) {
 				e.printStackTrace();
-			} catch (ParserException e) {
+			}
+			catch (ParserException e) {
 				e.printStackTrace();
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
@@ -155,20 +161,24 @@ public class TypedCSEncInHttp {
 							});
 
 							th.start();
-						} else {
+						}
+						else {
 							session = Integer.parseInt(sessionState);
 							server = sessionMap.get(session);
 							server.connectClient(client, reader, writer);
 
 							server.handleClient();
 						}
-					} else {
+					}
+					else {
 						System.err.println("Program Funstore not found");
 					}
 				}
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				e.printStackTrace();
-			} catch (NumberFormatException e) {
+			}
+			catch (NumberFormatException e) {
 				e.printStackTrace();
 			}
 		}
@@ -233,17 +243,20 @@ public class TypedCSEncInHttp {
 						EncTerm reqTerm = new App(cloFn, args);
 
 						evalServer(reqTerm);
-						
+
 						reader.close();
 						writer.close();
-						
+
 						sessionMap.remove(session);
-					} else {
+					}
+					else {
 						System.err.println("Not expected: " + protocol);
 					}
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					e.printStackTrace();
-				} catch (ParseException e) {
+				}
+				catch (ParseException e) {
 					e.printStackTrace();
 				}
 			}
@@ -268,7 +281,8 @@ public class TypedCSEncInHttp {
 							m = CSEncMain.substs(CSEncMain.substs(closedFun.getM(), closedFun.getZs(), funClo.getVs()),
 									closedFun.getXs(), mApp.getArgs());
 						}
-					} else if (m instanceof Call) {
+					}
+					else if (m instanceof Call) {
 						Call mCall = (Call) m;
 
 						if (mCall.getCall() instanceof Clo) {
@@ -286,7 +300,8 @@ public class TypedCSEncInHttp {
 						}
 
 						return;
-					} else if (m instanceof Clo) {
+					}
+					else if (m instanceof Clo) {
 						Clo mClo = (Clo) m;
 
 						writeHeader(200, "OK");
@@ -295,7 +310,8 @@ public class TypedCSEncInHttp {
 						writer.println(mClo.toJson());
 
 						return;
-					} else if (m instanceof Const) {
+					}
+					else if (m instanceof Const) {
 						Const mConst = (Const) m;
 
 						writeHeader(200, "OK");
@@ -318,7 +334,7 @@ public class TypedCSEncInHttp {
 
 		private Socket server;
 		private BufferedReader reader;
-		private PrintWriter writer;
+		private BufferedWriter writer;
 
 		private JSONParser jsonParser;
 		private Integer session;
@@ -327,7 +343,7 @@ public class TypedCSEncInHttp {
 			this.serverAddr = serverAddr;
 			this.programName = programName;
 			this.clientFS = clientFS;
-			
+
 			jsonParser = new JSONParser();
 		}
 
@@ -337,27 +353,30 @@ public class TypedCSEncInHttp {
 					server = new Socket(serverAddr, PORT);
 
 					reader = new BufferedReader(new InputStreamReader(server.getInputStream()));
-					writer = new PrintWriter(server.getOutputStream(), true);
+					writer = new BufferedWriter(new OutputStreamWriter(server.getOutputStream()));
 
-				} catch (UnknownHostException e) {
+				}
+				catch (UnknownHostException e) {
 					e.printStackTrace();
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
 
-		private void writeHeader() {
+		private void writeHeader() throws IOException {
 			connectServer();
-			writer.print("GET " + "/rpc/" + programName + " HTTP/1.1\r\n");
-			writer.print("Host: " + server.getInetAddress().getHostAddress() + "\r\n");
-			writer.print("\r\n");
+			writer.write("GET " + "/rpc/" + programName + " HTTP/1.1\r\n");
+			writer.write("Host: " + server.getInetAddress().getHostAddress() + "\r\n");
+			writer.write("\r\n");
 		}
 
 		private void disconnect() {
 			try {
 				server.close();
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -376,11 +395,12 @@ public class TypedCSEncInHttp {
 
 					if (statusCode == 200) {
 						String line;
-						while(!(line = reader.readLine()).equals(""));
-						
+						while (!(line = reader.readLine()).equals(""))
+							;
+
 						String sessionState = reader.readLine();
 						String protocol = reader.readLine(); // Protocol: REPLY or CALL
-						
+
 						if (sessionState.equals(CLOSE_SESSION))
 							session = null;
 						else
@@ -392,7 +412,8 @@ public class TypedCSEncInHttp {
 							EncValue replyVal = JSonUtil.fromJson(replyValInJson);
 
 							retm = new Let(mLet.getVal(), replyVal, mLet.getM2());
-						} else if (CALL.equals(protocol)) {
+						}
+						else if (CALL.equals(protocol)) {
 							String cloInStr = reader.readLine();
 							JSONObject cloInJson = (JSONObject) jsonParser.parse(cloInStr);
 							EncValue clo = JSonUtil.fromJson(cloInJson);
@@ -404,12 +425,13 @@ public class TypedCSEncInHttp {
 								String strArg = reader.readLine();
 								JSONObject argInJson = (JSONObject) jsonParser.parse(strArg);
 								EncValue arg = JSonUtil.fromJson(argInJson);
-								
+
 								args.add(arg);
 							}
 
 							retm = new Let(mLet.getVal(), new App(clo, args), mLet.getM2());
-						} else {
+						}
+						else {
 							System.err.println("receiver: Neither REPLY or CALL: " + protocol);
 							retm = null;
 						}
@@ -418,10 +440,12 @@ public class TypedCSEncInHttp {
 						System.err.println(statusCode);
 						retm = null;
 					}
-				} catch (ParseException exn) {
+				}
+				catch (ParseException exn) {
 					exn.printStackTrace();
 					retm = null;
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 					retm = null;
 				}
@@ -450,42 +474,53 @@ public class TypedCSEncInHttp {
 											closedFun.getXs(), mApp1.getArgs()),
 									mLet.getM2());
 						}
-					} else if (m1 instanceof Req) {
+					}
+					else if (m1 instanceof Req) {
 						Req mReq1 = (Req) m1;
 
 						if (mReq1.getReq() instanceof Clo) {
 							Clo reqClo = (Clo) mReq1.getReq();
 							ArrayList<EncValue> args = mReq1.getArgs();
 
-							writeHeader();
-							if (session == null)
-								writer.println(OPEN_SESSION);
-							else
-								writer.println(session);
-							writer.println(REQ);
-							writer.println(reqClo.toJson());
-							writer.println(args.size());
+							try {
+								writeHeader();
+								if (session == null)
+									writer.write(OPEN_SESSION + "\n");
+								else
+									writer.write(session + "\n");
+								writer.write(REQ + "\n");
+								writer.write(reqClo.toJson() + "\n");
+								writer.write(args.size() + "\n");
 
-							for (EncValue v : args) {
-								writer.println(v.toJson());
+								for (EncValue v : args) {
+									writer.write(v.toJson() + "\n");
+								}
+								writer.flush();
+							}
+							catch (IOException e) {
+								e.printStackTrace();
 							}
 
 							m = receiver.apply(mLet);
 						}
-					} else if (m1 instanceof Let) {
+					}
+					else if (m1 instanceof Let) {
 						Let mLet1 = (Let) m1;
 
 						m = new Let(mLet1.getVal(), mLet1.getM1(), new Let(mLet.getVal(), mLet1.getM2(), mLet.getM2()));
-					} else if (m1 instanceof Clo) {
+					}
+					else if (m1 instanceof Clo) {
 						Clo mClo1 = (Clo) m1;
 
 						m = CSEncMain.subst(mLet.getM2(), mLet.getVal(), mClo1);
-					} else if (m1 instanceof Const) {
+					}
+					else if (m1 instanceof Const) {
 						Const mConst1 = (Const) m1;
 
 						m = CSEncMain.subst(mLet.getM2(), mLet.getVal(), mConst1);
 					}
-				} else if (m instanceof Clo || m instanceof Const) {
+				}
+				else if (m instanceof Clo || m instanceof Const) {
 					return (EncValue) m;
 				}
 			}

@@ -1,7 +1,7 @@
 # Implementation of a Theory of RPC calculi
 
-## A running example with the state-encoding calculi
-## Run com.example.stacs.TypedCSStaInHttp
+1. A running example with the state-encoding calculi
+   - Run com.example.stacs.TypedCSStaInHttp
 
 ```
 Enter a file name: ServerClient01.txt
@@ -48,8 +48,8 @@ result: 1
 Enter a file name: 
 ```
 
-## A running example with the stateful calculi
-### Run com.example.stacs.TypedCSStaInHttp
+2. A running example with the stateful calculi
+   - Run com.example.stacs.TypedCSStaInHttp
 
 ```
 Enter a file name: ServerClient01.txt

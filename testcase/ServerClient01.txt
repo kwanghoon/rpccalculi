@@ -1,0 +1,1 @@
+(lam^s f. (lam^s x. x) (f 1)) (lam^c y. (lam^s z. z) y)

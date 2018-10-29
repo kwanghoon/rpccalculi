@@ -1,0 +1,1 @@
+(lam^c xyz. xyz) (lam^s abc123. abc123)

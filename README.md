@@ -1,6 +1,6 @@
 # Implementation of a Theory of RPC calculi
 
-0. A running example on a prototype evaluator (not using HTTP)
+0. A running example on a prototype compiler
    - Run com.example.rpc.Main
    
 ```

@@ -54,7 +54,7 @@ let f1 = Clo(_gf3, {}) in let x2 = Clo(_gf5, {}) in let r3 = Req(f1) (x2) in r3
 ```
 
 1. A running example with the state-encoding calculi using HTTP
-   - Run com.example.stacs.TypedCSStaInHttp
+   - Run com.example.enccs.TypedCSEncInHttp
 
 ```
 Enter a file name: ServerClient01.txt

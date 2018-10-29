@@ -1,6 +1,8 @@
 # Implementation of a Theory of RPC calculi
 
-0. A running example on a prototype evaluator
+0. A running example on a prototype evaluator (not using HTTP)
+   - Run com.example.rpc.Main
+   
 ```
 ---- RPC Term ----
 (lam^s f. (lam^s x. x) (f 1)) (lam^c y. (lam^s z. z) y)
@@ -51,7 +53,7 @@ main client expression:
 let f1 = Clo(_gf3, {}) in let x2 = Clo(_gf5, {}) in let r3 = Req(f1) (x2) in r3
 ```
 
-1. A running example with the state-encoding calculi
+1. A running example with the state-encoding calculi using HTTP
    - Run com.example.stacs.TypedCSStaInHttp
 
 ```
@@ -99,7 +101,7 @@ result: 1
 Enter a file name: 
 ```
 
-2. A running example with the stateful calculi
+2. A running example with the stateful calculi using HTTP
    - Run com.example.stacs.TypedCSStaInHttp
 
 ```

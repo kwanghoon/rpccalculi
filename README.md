@@ -1,6 +1,7 @@
 # Implementation of a Theory of RPC calculi
 
-Run com.example.stacs.TypedCSStaInHttp
+## A running of (lam^s f. (lam^s x. x) (f 1)) (lam^c y. (lam^s z. z) y) with the state-encoding calculi
+## Run com.example.stacs.TypedCSStaInHttp
 
 Enter a file name: ServerClient01.txt
 (lam^s f. (lam^s x. x) (f 1)) (lam^c y. (lam^s z. z) y)
@@ -52,8 +53,8 @@ CLIENT: 1
 result: 1
 Enter a file name: 
 
-
-Run com.example.stacs.TypedCSStaInHttp
+## A running of (lam^s f. (lam^s x. x) (f 1)) (lam^c y. (lam^s z. z) y) with the stateful calculi
+### Run com.example.stacs.TypedCSStaInHttp
 
 Enter a file name: ServerClient01.txt
 (lam^s f. (lam^s x. x) (f 1)) (lam^c y. (lam^s z. z) y)

@@ -1,17 +1,11 @@
 # Implementation of a Theory of RPC calculi
 
-## A running of (lam^s f. (lam^s x. x) (f 1)) (lam^c y. (lam^s z. z) y) with the state-encoding calculi
+## A running example with the state-encoding calculi
 ## Run com.example.stacs.TypedCSStaInHttp
 
+```
 Enter a file name: ServerClient01.txt
 (lam^s f. (lam^s x. x) (f 1)) (lam^c y. (lam^s z. z) y)
-
-Client FunStore: _gf2 = {f7} lam^c(z10).let y9 = (f7) (z10) in Ret(y9)
-_gf5 = {} lam^c(y).let f12 = Clo(_gf4, {}) in let x13 = y in let r14 = Req(f12) (x13) in r14
-
-Server FunStore: _gf3 = {} lam^s(f).let f4 = Clo(_gf1, {}) in let x5 = let f7 = f in let x8 = 1 in let r11 = Call(Clo(_gf2, {f7})) (x8) in r11 in let r6 = (f4) (x5) in r6
-_gf4 = {} lam^s(z).z
-_gf1 = {} lam^s(x).x
 
 CLIENT: let f1 = Clo(_gf3, {}) in let x2 = Clo(_gf5, {}) in let r3 = Req(f1) (x2) in r3
 CLIENT: let x2 = Clo(_gf5, {}) in let r3 = Req(Clo(_gf3, {})) (x2) in r3
@@ -52,10 +46,12 @@ CLIENT: let r3 = 1 in r3
 CLIENT: 1
 result: 1
 Enter a file name: 
+```
 
-## A running of (lam^s f. (lam^s x. x) (f 1)) (lam^c y. (lam^s z. z) y) with the stateful calculi
+## A running example with the stateful calculi
 ### Run com.example.stacs.TypedCSStaInHttp
 
+```
 Enter a file name: ServerClient01.txt
 (lam^s f. (lam^s x. x) (f 1)) (lam^c y. (lam^s z. z) y)
 
@@ -90,3 +86,4 @@ CLIENT: let r3 = 1 in r3
 CLIENT: 1
 Result: 1
 Enter a file name: 
+```

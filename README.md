@@ -2,18 +2,20 @@
 
 0. A running example on a prototype evaluator
 ```
+---- RPC Term ----
 (lam^s f. (lam^s x. x) (f 1)) (lam^c y. (lam^s z. z) y)
-(lam^s f (lam^s x x) ((f) (1))) (lam^c y (lam^s z z) (y))
-1
+
+---- Type inference ----
 (lam^s (f: (int-c->int)).(lam^s (x: int).x)^s^((f)^c^(1)))^s^(lam^c (y: int).(lam^s (z: int).z)^s^(y))
-----RPC EncTerm----
+
+----RPC-encoded Term----
 let f1 = lam^s(f k4).(lam^s(f5).(lam^s(f7).(lam^s(x8).Call(lam^c(z9).let r10 = (f7) (z9) in Req(lam^s(x6).(f5) (x6 k4)) (r10)) (x8)) (1)) (f)) (lam^s(x k11).(k11) (x)) in let x2 = lam^c(y).let f12 = lam^s(z k15).(k15) (z) in let x13 = y in let r14 = Req(f12) (x13 lam^s(x16).x16) in r14 in let r3 = Req(f1) (x2 lam^s(x17).x17) in r3
 1
-----RPC StaTerm----
+----RPC-stateful Term----
 let f1 = lam^s(f).let f4 = lam^s(x).x in let x5 = let f7 = f in let x8 = 1 in let r11 = Call(lam^c(z10).let y9 = (f7) (z10) in Ret(y9)) (x8) in r11 in let r6 = (f4) (x5) in r6 in let x2 = lam^c(y).let f12 = lam^s(z).z in let x13 = y in let r14 = Req(f12) (x13) in r14 in let r3 = Req(f1) (x2) in r3
 1
-In Encoding CS: 
-----CS EncTerm----
+
+----CS-encoded Term----
 client function store: 
 _gf10 = {} lam^c(y).let f12 = Clo(_gf8, {}) in let x13 = y in let r14 = Req(f12) (x13 Clo(_gf9, {})) in r14
 _gf2 = {f7 k4 f5} lam^c(z9).let r10 = (f7) (z9) in Req(Clo(_gf1, {k4 f5})) (r10)
@@ -31,38 +33,8 @@ _gf1 = {k4 f5} lam^s(x6).(f5) (x6 k4)
 
 main client expression: 
 let f1 = Clo(_gf7, {}) in let x2 = Clo(_gf10, {}) in let r3 = Req(f1) (x2 Clo(_gf11, {})) in r3
-evaluates to 
-EncCS Client: let f1 = Clo(_gf7, {}) in let x2 = Clo(_gf10, {}) in let r3 = Req(f1) (x2 Clo(_gf11, {})) in r3
-EncCS Client: let x2 = Clo(_gf10, {}) in let r3 = Req(Clo(_gf7, {})) (x2 Clo(_gf11, {})) in r3
-EncCS Client: let r3 = Req(Clo(_gf7, {})) (Clo(_gf10, {}) Clo(_gf11, {})) in r3
-EncCS Server: (Clo(_gf7, {})) (Clo(_gf10, {}) Clo(_gf11, {}))
-EncCS Server: (Clo(_gf5, {Clo(_gf10, {}) Clo(_gf11, {})})) (Clo(_gf6, {}))
-EncCS Server: (Clo(_gf4, {Clo(_gf11, {}) Clo(_gf6, {})})) (Clo(_gf10, {}))
-EncCS Server: (Clo(_gf3, {Clo(_gf10, {}) Clo(_gf11, {}) Clo(_gf6, {})})) (1)
-EncCS Server: Call(Clo(_gf2, {Clo(_gf10, {}) Clo(_gf11, {}) Clo(_gf6, {})})) (1)
-EncCS Client: let r3 = (Clo(_gf2, {Clo(_gf10, {}) Clo(_gf11, {}) Clo(_gf6, {})})) (1) in r3
-EncCS Client: let r3 = let r10 = (Clo(_gf10, {})) (1) in Req(Clo(_gf1, {Clo(_gf11, {}) Clo(_gf6, {})})) (r10) in r3
-EncCS Client: let r10 = (Clo(_gf10, {})) (1) in let r3 = Req(Clo(_gf1, {Clo(_gf11, {}) Clo(_gf6, {})})) (r10) in r3
-EncCS Client: let r10 = let f12 = Clo(_gf8, {}) in let x13 = 1 in let r14 = Req(f12) (x13 Clo(_gf9, {})) in r14 in let r3 = Req(Clo(_gf1, {Clo(_gf11, {}) Clo(_gf6, {})})) (r10) in r3
-EncCS Client: let f12 = Clo(_gf8, {}) in let r10 = let x13 = 1 in let r14 = Req(f12) (x13 Clo(_gf9, {})) in r14 in let r3 = Req(Clo(_gf1, {Clo(_gf11, {}) Clo(_gf6, {})})) (r10) in r3
-EncCS Client: let r10 = let x13 = 1 in let r14 = Req(Clo(_gf8, {})) (x13 Clo(_gf9, {})) in r14 in let r3 = Req(Clo(_gf1, {Clo(_gf11, {}) Clo(_gf6, {})})) (r10) in r3
-EncCS Client: let x13 = 1 in let r10 = let r14 = Req(Clo(_gf8, {})) (x13 Clo(_gf9, {})) in r14 in let r3 = Req(Clo(_gf1, {Clo(_gf11, {}) Clo(_gf6, {})})) (r10) in r3
-EncCS Client: let r10 = let r14 = Req(Clo(_gf8, {})) (1 Clo(_gf9, {})) in r14 in let r3 = Req(Clo(_gf1, {Clo(_gf11, {}) Clo(_gf6, {})})) (r10) in r3
-EncCS Client: let r14 = Req(Clo(_gf8, {})) (1 Clo(_gf9, {})) in let r10 = r14 in let r3 = Req(Clo(_gf1, {Clo(_gf11, {}) Clo(_gf6, {})})) (r10) in r3
-EncCS Server: (Clo(_gf8, {})) (1 Clo(_gf9, {}))
-EncCS Server: (Clo(_gf9, {})) (1)
-EncCS Server: 1
-EncCS Client: let r14 = 1 in let r10 = r14 in let r3 = Req(Clo(_gf1, {Clo(_gf11, {}) Clo(_gf6, {})})) (r10) in r3
-EncCS Client: let r10 = 1 in let r3 = Req(Clo(_gf1, {Clo(_gf11, {}) Clo(_gf6, {})})) (r10) in r3
-EncCS Client: let r3 = Req(Clo(_gf1, {Clo(_gf11, {}) Clo(_gf6, {})})) (1) in r3
-EncCS Server: (Clo(_gf1, {Clo(_gf11, {}) Clo(_gf6, {})})) (1)
-EncCS Server: (Clo(_gf6, {})) (1 Clo(_gf11, {}))
-EncCS Server: (Clo(_gf11, {})) (1)
-EncCS Server: 1
-EncCS Client: let r3 = 1 in r3
-1
-In Stateful CS: 
-----CS StaTerm----
+
+----CS-stateful Term----
 client function store: 
 _gf2 = {f7} lam^c(z10).let y9 = (f7) (z10) in Ret(y9)
 _gf5 = {} lam^c(y).let f12 = Clo(_gf4, {}) in let x13 = y in let r14 = Req(f12) (x13) in r14
@@ -74,8 +46,6 @@ _gf1 = {} lam^s(x).x
 
 main client expression: 
 let f1 = Clo(_gf3, {}) in let x2 = Clo(_gf5, {}) in let r3 = Req(f1) (x2) in r3
-evaluates to 
-1
 ```
 
 1. A running example with the state-encoding calculi

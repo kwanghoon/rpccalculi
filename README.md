@@ -8,12 +8,14 @@
 ---- Type inference ----
 (lam^s (f: (int-c->int)).(lam^s (x: int).x)^s^((f)^c^(1)))^s^(lam^c (y: int).(lam^s (z: int).z)^s^(y))
 
+
 ----RPC-encoded Term----
 let f1 = lam^s(f k4).(lam^s(f5).(lam^s(f7).(lam^s(x8).Call(lam^c(z9).let r10 = (f7) (z9) in Req(lam^s(x6).(f5) (x6 k4)) (r10)) (x8)) (1)) (f)) (lam^s(x k11).(k11) (x)) in let x2 = lam^c(y).let f12 = lam^s(z k15).(k15) (z) in let x13 = y in let r14 = Req(f12) (x13 lam^s(x16).x16) in r14 in let r3 = Req(f1) (x2 lam^s(x17).x17) in r3
-1
+
+
 ----RPC-stateful Term----
 let f1 = lam^s(f).let f4 = lam^s(x).x in let x5 = let f7 = f in let x8 = 1 in let r11 = Call(lam^c(z10).let y9 = (f7) (z10) in Ret(y9)) (x8) in r11 in let r6 = (f4) (x5) in r6 in let x2 = lam^c(y).let f12 = lam^s(z).z in let x13 = y in let r14 = Req(f12) (x13) in r14 in let r3 = Req(f1) (x2) in r3
-1
+
 
 ----CS-encoded Term----
 client function store: 
@@ -33,6 +35,7 @@ _gf1 = {k4 f5} lam^s(x6).(f5) (x6 k4)
 
 main client expression: 
 let f1 = Clo(_gf7, {}) in let x2 = Clo(_gf10, {}) in let r3 = Req(f1) (x2 Clo(_gf11, {})) in r3
+
 
 ----CS-stateful Term----
 client function store: 
